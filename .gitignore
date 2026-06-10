@@ -43,3 +43,9 @@ output/statistical_results.txt
 *.zip
 Springer_Nature_LaTeX_Template/
 temp/
+
+# Ignore LaTeX files
+*.tex
+*.cls
+*.bst
+*.bib
