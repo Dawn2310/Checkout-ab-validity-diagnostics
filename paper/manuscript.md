@@ -51,7 +51,7 @@
 
 \begin{document}
 
-\title[Aggregate Marketing Campaigns]{What Can Be Learned from Aggregate Marketing Campaigns? Validity Diagnostics, Overdispersion, and Limits of Causal Interpretation}
+\title[Aggregate Campaign Diagnostics]{What Can Be Learned from a Daily-Aggregate Marketing Campaign Dataset? Validity Diagnostics, Overdispersion, and Limits of Causal Interpretation}
 
 \author*[1]{\fnm{Nguyen Luong Hai} \sur{Dang}}\email{nguyenluonghaidang2006pq@gmail.com}
 \author[1]{\fnm{Duong Quoc} \sur{Huu}}
@@ -87,7 +87,7 @@ We address three research questions:
 \item[\textbf{RQ3}] What descriptive funnel and temporal patterns appear, and why should they be treated as hypothesis-generating rather than causal?
 \end{enumerate}
 
-The contribution of the paper is not a claim that the redesigned checkout should be deployed or rejected. Rather, the contribution is a structured diagnostic reading of a poorly documented aggregate experiment. The analysis shows how an apparently decisive pooled conversion-rate result becomes fragile once the analyst accounts for design ambiguity, time aggregation, post-treatment selection into clicks, and sparse subgroup evidence. This reframing turns the dataset from a simple conversion-rate exercise into a case study on the limits of causal interpretation in public A/B testing data.
+The contribution of the paper is not a claim that the Test campaign should be deployed or rejected. Rather, the contribution is a structured diagnostic reading of a poorly documented aggregate experiment. The analysis shows how an apparently decisive pooled conversion-rate result becomes fragile once the analyst accounts for design ambiguity, time aggregation, post-treatment selection into clicks, and sparse subgroup evidence. This reframing turns the dataset from a simple conversion-rate exercise into a case study on the limits of causal interpretation in public A/B testing data.
 
 %==============================================================
 \section{Related Work}\label{sec:related}
@@ -291,7 +291,7 @@ Overall purchase per click & 9.85\% & 8.64\% & $-12.3\%$ & $<10^{-30}$ & Clicker
 \end{tabular}
 \end{table}
 
-The observed pattern is consistent with at least two different stories. One story is a design-mechanism story: the Test campaign's landing page attracts attention but introduces friction before cart formation. Another story is a selection story: the Test campaign attracts additional lower-intent clickers (perhaps via broader ad targeting), so the conditional mid-funnel rates decline even if the checkout mechanics themselves are identical. Given that the observed variables resemble campaign-level aggregates rather than a verified controlled on-page split test, the selection story is more plausible. The aggregate dataset cannot fully disentangle these without user-level tracking. This is why the paper treats funnel decomposition as diagnostic exploration rather than causal mechanism identification.
+The observed pattern is consistent with at least two different stories. One story is a design-mechanism story: the Test campaign's landing page attracts attention but introduces friction before cart formation. Another story is a selection story: the Test campaign attracts additional lower-intent clickers (perhaps via broader ad targeting), so the conditional mid-funnel rates decline even if the checkout mechanics themselves are identical. Given that the observed variables resemble campaign-level aggregates rather than a verified controlled on-page split test, the selection story should be treated as the more cautious interpretation. The aggregate dataset cannot fully disentangle these without user-level tracking. This is why the paper treats funnel decomposition as diagnostic exploration rather than causal mechanism identification.
 
 \begin{figure}[!htbp]
 \centering
