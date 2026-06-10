@@ -105,7 +105,7 @@ Sample ratio mismatch is another central diagnostic. In a clean randomised exper
 
 \subsection{Funnel analysis and post-treatment selection}\label{subsec:funnel-selection}
 
-Funnel analysis is useful because product interventions often affect different stages in different directions. A checkout redesign may change attention, product inspection, cart formation, and purchase completion separately. Prior studies on cart abandonment and checkout experience motivate this stage-wise perspective \cite{kukar2010determinants,huang2018mobile,mcdowell2016retail,bleier2019creating}.
+Funnel analysis is useful because product interventions often affect different stages in different directions. A marketing campaign or checkout-related intervention may change attention, product inspection, cart formation, and purchase completion separately. Prior studies on cart abandonment and checkout experience motivate this stage-wise perspective \cite{kukar2010determinants,huang2018mobile,mcdowell2016retail,bleier2019creating}.
 
 At the same time, funnel rates are not automatically causal stage effects. If treatment changes the probability of clicking, then the set of users who click under Test may differ from the set who click under Control. Any later rate conditioned on clickers is then affected by post-treatment selection. A lower add-to-cart rate among Test clickers may reflect lower purchase intent among the additional clickers attracted by the design, not necessarily a defect in the cart step itself. This is the key causal distinction that the present paper makes explicit.
 
@@ -273,7 +273,7 @@ This contrast is the first main finding. The dataset supports a descriptive stat
 
 \subsection{Funnel decomposition reveals a compositional puzzle, not a direct mechanism}\label{subsec:results-funnel}
 
-The funnel analysis reveals why the aggregate result is difficult to interpret. The Test variant has a much higher click-through rate, but lower view-content and add-to-cart progression among the users who enter the funnel. Among users who reach the cart, the Test arm has a higher purchase-given-cart rate. A superficial reading would say that the redesign improves attraction and late purchase completion but damages the middle of the funnel. The more rigorous reading is weaker and more useful: the redesign changes the composition of the users observed at each conditional stage.
+The funnel analysis reveals why the aggregate result is difficult to interpret. The Test variant has a much higher click-through rate, but lower view-content and add-to-cart progression among the users who enter the funnel. Among users who reach the cart, the Test arm has a higher purchase-given-cart rate. A superficial reading would say that the Test campaign improves attraction and late purchase completion but damages the middle of the funnel. The more rigorous reading is weaker and more useful: the Test campaign changes the composition of the users observed at each conditional stage.
 
 \begin{table}[!htbp]
 \caption{Funnel-stage differences with explicit interpretation limits. Tests use two-proportion comparisons with Holm correction.}\label{tab:funnel}
