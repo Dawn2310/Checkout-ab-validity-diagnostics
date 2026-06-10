@@ -1,0 +1,17 @@
+======================================================================
+CUPED VARIANCE REDUCTION (Deng et al. 2013)
+======================================================================
+
+  Pre-experiment window: first 7 days of Control
+  Post-experiment days per group: 23
+  theta (Cov/Var) = 0.1171
+
+  Mean CR (raw)     Control=11.4370%  Test=8.6047%
+  Mean CR (CUPED)   Control=11.4370%  Test=8.6047%
+
+  Welch t-test (raw)   t=-1.6455   p=0.1088
+  Welch t-test (CUPED) t=-1.6541   p=0.1072
+
+  >>> Average variance reduction = 1.04%
+
+======================================================================

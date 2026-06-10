@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# Virtual envs
+.venv/
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Project specifics — keep raw dataset and paper, regen outputs
+output/figures/
+output/tables/
+output/processed/
+output/statistical_results.txt
+
+# Large model/cache files
+*.pkl
+*.h5
+*.parquet
+
+# Notebooks scratch
+*-checkpoint.ipynb
+
+# Ignore papers and templates
+*.pdf
+*.zip
+Springer_Nature_LaTeX_Template/
+temp/

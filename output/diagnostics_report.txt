@@ -1,0 +1,23 @@
+======================================================================
+A/B DIAGNOSTICS REPORT
+======================================================================
+
+[1] SAMPLE RATIO MISMATCH (SRM)
+  Control clicks = 157,368
+  Test    clicks = 180,970
+  Observed control share = 0.4651  (design = 0.5)
+  chi2 = 1646.4435  p = 0.00e+00
+  => SRM DETECTED — randomization may be broken
+
+[2] A/A SIMULATION (split Control into two halves)
+  n_iters = 2,000   nominal alpha = 0.05
+  empirical false-positive rate = 87.800%
+  KS test vs U[0,1]: p = 0.0000  (NOT uniform)
+
+[3] OUTLIER DAYS (1.5×IQR on daily CR): 3 day(s)
+  group       date       cr  clicks  purchase    iqr_lo   iqr_hi
+Control 2019-08-10 0.322354    2277       734 -0.057607 0.264453
+Control 2019-08-12 0.265286    2993       794 -0.057607 0.264453
+   Test 2019-08-07 0.210851    4221       890 -0.010819 0.193185
+
+======================================================================
