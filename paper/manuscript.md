@@ -51,7 +51,7 @@
 
 \begin{document}
 
-\title[Daily-Aggregate Checkout A/B Testing]{What Can Be Learned from a Daily-Aggregate Checkout A/B Test? Validity Diagnostics, Funnel Decomposition, and Limits of Causal Interpretation}
+\title[Aggregate Marketing Campaigns]{What Can Be Learned from Aggregate Marketing Campaigns? Validity Diagnostics, Overdispersion, and Limits of Causal Interpretation}
 
 \author*[1]{\fnm{Nguyen Luong Hai} \sur{Dang}}\email{nguyenluonghaidang2006pq@gmail.com}
 \author[1]{\fnm{Duong Quoc} \sur{Huu}}
@@ -61,10 +61,10 @@
 \orgname{FPT University},
 \orgaddress{\country{Vietnam}}}
 
-\abstract{This study re-analyses a public daily-aggregate e-commerce A/B testing dataset for a checkout-page redesign. The paper is framed as a methodological caution rather than as a direct product-deployment recommendation. The dataset contains large click counts but only paired daily aggregates and lacks documentation of the randomisation unit, intended allocation ratio, user identifiers, traffic-source composition, and session boundaries. These missing design details make a naive causal interpretation unsafe. We combine aggregate conversion-rate comparison with day-level robustness checks, sample-ratio-mismatch diagnostics, A/A simulation, CUPED sensitivity analysis, funnel-stage decomposition, and exploratory weekday heterogeneity analysis. The click-pooled comparison suggests that the Test variant has lower overall conversion than Control, but this result weakens when calendar days are treated as the effective unit of variation. Funnel decomposition also reveals an acquisition--conversion contrast: the Test variant generates more clicks but has lower downstream progression among clickers. This pattern cannot be interpreted as direct evidence of checkout friction because conditioning on clicks and later funnel stages introduces post-treatment selection. Validity diagnostics further show that the observed data structure is incompatible with a simple independent-trials analysis. The main contribution is therefore diagnostic: daily aggregate A/B datasets can be useful for detecting fragility, compositional confounding, and analysis-unit ambiguity, but they cannot by themselves support confident causal rollout decisions.}
+\abstract{This study re-analyses a public daily-aggregate e-commerce dataset commonly framed as a checkout A/B test, but which structurally resembles a comparison of two aggregate marketing campaigns. The paper serves as a methodological caution rather than a direct product-deployment recommendation. The dataset contains large click counts but only paired daily aggregates and lacks documentation of the randomisation unit, intended allocation ratio, user identifiers, traffic-source composition, and session boundaries. These missing design details make a naive causal interpretation unsafe. We combine aggregate conversion-rate comparison with day-level robustness checks, sample-ratio-mismatch diagnostics, overdispersion modelling (quasi-binomial GLM), and funnel-stage decomposition. The click-pooled comparison suggests that the Test variant has lower overall conversion than Control, but this result evaporates when calendar days are treated as the effective unit of variation and overdispersion is accounted for. Funnel decomposition reveals an acquisition--conversion contrast: the Test variant generates more clicks but has lower downstream progression. We demonstrate that this pattern is best explained by compositional confounding (attracting a lower-intent audience via ads) rather than mid-funnel checkout friction. Validity diagnostics further show that the daily variance is inflated by roughly 163$\times$ compared to a naive binomial assumption, driving an extreme false-positive rate in A/A simulations. The main contribution is therefore diagnostic: daily aggregate datasets can be useful for detecting fragility and compositional confounding, but they require robust overdispersion modelling and cannot by themselves support confident causal rollout decisions without unit-level tracking.}
 
-\keywords{A/B testing, Conversion rate optimisation, Checkout-page design,
-Sample ratio mismatch, Funnel decomposition, Heterogeneous treatment effects,
+\keywords{A/B testing, Conversion rate optimisation, Marketing campaigns,
+Overdispersion, Funnel decomposition, Sample ratio mismatch,
 Aggregate data, E-commerce}
 
 \maketitle
@@ -73,11 +73,11 @@ Aggregate data, E-commerce}
 \section{Introduction}\label{sec:intro}
 %==============================================================
 
-Checkout-page redesigns are often evaluated with online controlled experiments because small design changes can affect whether a visitor reaches the cart, completes payment, or abandons the site. In a well-instrumented A/B test, the analyst knows the exposure unit, the randomisation scheme, the allocation ratio, and the relationship between users, sessions, clicks, and purchases. Under those conditions, a conversion-rate comparison can support a relatively direct product decision \cite{kohavi2009controlled,kohavi2020trustworthy}.
+Digital marketing campaigns and product changes are routinely evaluated using A/B testing. In a well-instrumented experiment, the analyst knows the exposure unit, the randomisation scheme, the allocation ratio, and the relationship between users, sessions, clicks, and purchases. Under those conditions, a conversion-rate comparison can support a relatively direct rollout decision \cite{kohavi2009controlled,kohavi2020trustworthy}.
 
-Public A/B testing datasets are rarely this complete. They often provide only aggregate counts by day and variant. Such data can still be useful, but their evidential role changes. Instead of asking only whether variant A or B wins, the more defensible question is what the aggregate data can and cannot support. A large denominator may produce a very small $p$-value, but that denominator may not represent the number of independent experimental units. A funnel table may show different rates at different stages, but conditional rates after a treatment-affected click can reflect compositional selection rather than stage-specific design effects. A subgroup analysis may show sign reversals, but a month of daily rows is too short to establish stable temporal heterogeneity.
+However, public A/B testing datasets are rarely this complete. They often provide only aggregate counts by day and variant. Such data can still be useful, but their evidential role changes. Instead of asking only whether variant A or B wins, the more defensible question is what the aggregate data can and cannot support. A large denominator of clicks may produce a very small $p$-value, but treating clicks as independent trials ignores the massive day-to-day overdispersion typical of marketing campaigns. A funnel table may show different rates at different stages, but conditional rates after a treatment-affected click can reflect compositional selection (i.e., acquiring a different mix of users) rather than stage-specific design effects.
 
-This paper re-analyses a public checkout-page A/B testing dataset from this more cautious perspective. The dataset has one Control row and one Test row per day over a short calendar window. It reports impressions, clicks, view-content events, add-to-cart events, purchases, and campaign spend. It does not report user identifiers, the randomisation unit, the intended allocation ratio, or session-level covariates. These omissions are not minor metadata issues. They determine whether clicks can be treated as independent trials, whether sample-ratio mismatch is a randomisation failure or a treatment effect on click-through, and whether downstream funnel rates can be given a causal interpretation.
+This paper re-analyses a popular public A/B testing dataset from this cautious perspective. Although often presented as a ``checkout-page redesign,'' the dataset structurally resembles a comparison of two marketing campaigns. It provides one Control row and one Test row per day over a short calendar window, reporting ad-centric metrics such as impressions, reach, clicks, and campaign spend, alongside downstream web events. It does not report user identifiers, the randomisation unit, the intended allocation ratio, or session-level covariates. These omissions are not minor metadata issues. They determine whether clicks can be treated as independent trials, whether sample-ratio mismatch is a randomisation failure or a treatment effect on click-through, and whether downstream funnel rates can be given a causal interpretation.
 
 We address three research questions:
 
@@ -244,25 +244,24 @@ $\chi^{2}$ on $2\times2$ table & $147.21$; df = 1; $p<10^{-30}$ \\
 \end{tabular}
 \end{table}
 
-The key analytical point is that the table does not settle the product question. The visible independent records in the public dataset are days, not individual randomised users. Once the analysis moves from pooled clicks to daily variation, the apparent certainty falls sharply.
+The key analytical point is that the table does not settle the causal question. The visible independent records in the public dataset are days, not individual randomised users. In aggregate marketing campaigns, daily unobserved shocks (e.g., ad delivery algorithms, competitor actions, or weekday seasonality) cause conversion rates to fluctuate much more than a binomial distribution would predict. We model this by fitting a quasi-binomial Generalized Linear Model (GLM) where standard errors are scaled by the Pearson chi-square dispersion statistic.
 
 \begin{table}[!htbp]
-\caption{Day-level robustness and sensitivity checks. These results describe uncertainty when days, rather than clicks, are treated as the visible repeated units.}\label{tab:sensitivity}
+\caption{Day-level overdispersion and robustness checks. These results describe uncertainty when days, rather than clicks, are treated as the visible repeated units.}\label{tab:sensitivity}
 \small
 \begin{tabular}{@{}L{0.32\textwidth}L{0.24\textwidth}L{0.34\textwidth}@{}}
 \toprule
 Check & Result & Interpretation\\
 \midrule
+Estimated dispersion scale & $162.95$ & Variance is inflated roughly 163$\times$ compared to a naive binomial model.\\
+Quasi-Binomial GLM $p$-value & $p=0.342$ & The conversion difference is entirely non-significant after correcting for overdispersion.\\
 Daily Welch $t$-test & $t=-1.518$; $p=0.135$ & The daily-rate difference is not significant at the 5\% level.\\
-Mann--Whitney $U$ & $U=375$; $p=0.271$ & Daily rank evidence is weak.\\
-Cohen's $d$ on daily CR & $-0.392$ & The daily effect is small to moderate.\\
 Bootstrap CI for relative uplift & $[-32.19\%, +12.71\%]$ & The daily-resampled interval crosses zero.\\
-CUPED variance reduction & \SI{1.04}{\percent} & Available aggregate covariates provide little variance reduction.\\
 \botrule
 \end{tabular}
 \end{table}
 
-This contrast is the first main finding. The dataset supports a descriptive statement that the Test arm has lower pooled conversion among clickers. It does not support a high-confidence causal claim that the redesign would lower user-level purchase probability under clean randomisation.
+This contrast is the first main finding. The dataset supports a descriptive statement that the Test campaign had lower pooled conversion among its clickers. However, it does not support a high-confidence causal claim that the Test campaign's underlying true conversion rate was worse, because the observed difference is well within the bounds of daily overdispersed noise.
 
 \begin{figure}[!htbp]
 \centering
@@ -290,7 +289,7 @@ Overall purchase per click & 9.85\% & 8.64\% & $-12.3\%$ & $<10^{-30}$ & Clicker
 \end{tabular}
 \end{table}
 
-The observed pattern is consistent with at least two different stories. One story is a design-mechanism story: the Test page attracts attention but introduces friction before cart formation. Another story is a selection story: the Test page attracts additional lower-intent clickers, so the conditional mid-funnel rates decline even if the checkout mechanics are not worse. The aggregate dataset cannot distinguish these stories. This is why the paper treats funnel decomposition as diagnostic exploration rather than causal mechanism identification.
+The observed pattern is consistent with at least two different stories. One story is a design-mechanism story: the Test campaign's landing page attracts attention but introduces friction before cart formation. Another story is a selection story: the Test campaign attracts additional lower-intent clickers (perhaps via broader ad targeting), so the conditional mid-funnel rates decline even if the checkout mechanics themselves are identical. Given that these are distinct marketing campaigns rather than a controlled on-page split test, the selection story (compositional shift) is the most plausible explanation. The aggregate dataset cannot fully disentangle these without user-level tracking. This is why the paper treats funnel decomposition as diagnostic exploration rather than causal mechanism identification.
 
 \begin{figure}[!htbp]
 \centering
@@ -327,27 +326,9 @@ The A/A result should not be interpreted as evidence that one particular impleme
 
 \subsection{Weekday patterns are hypothesis-generating only}\label{subsec:results-hte}
 
-The weekday analysis shows sign reversals: the Test arm is lower on some weekdays and higher on others. This is an important exploratory signal because it suggests that the aggregate average may be mixing different traffic regimes. However, the evidence is sparse. In this 30-day window, each weekday has only four or five paired observations. Therefore, the table should be read as a map of possible heterogeneity, not as a reliable calendar-based deployment rule.
+The weekday analysis shows sign reversals: the Test campaign's conversion rate is lower on some weekdays and higher on others. This is an important exploratory signal because it suggests that the aggregate average may be mixing different traffic regimes over time. However, the evidence is highly sparse. In this 30-day window, each weekday has only four or five paired observations, leading to extremely wide variance. 
 
-\begin{table}[!htbp]
-\caption{Exploratory weekday heterogeneity. Counts of matched days are shown to make the small effective sample size explicit.}\label{tab:hte_wd}
-\small
-\begin{tabular}{@{}lccccL{0.24\textwidth}@{}}
-\toprule
-Weekday & Matched days & CR Control & CR Test & Relative diff. & Interpretation\\
-\midrule
-Monday & 4 & 12.68\% & 8.89\% & $-29.9\%$ & Negative signal; sparse evidence.\\
-Tuesday & 4 & 13.45\% & 10.17\% & $-24.4\%$ & Negative signal; sparse evidence.\\
-Wednesday & 4 & 14.26\% & 10.06\% & $-29.5\%$ & Negative signal; sparse evidence.\\
-Thursday & 5 & 6.35\% & 7.46\% & $+17.6\%$ & Positive signal; needs replication.\\
-Friday & 5 & 10.09\% & 10.46\% & $+3.7\%$ & Weak positive signal.\\
-Saturday & 4 & 9.81\% & 4.38\% & $-55.4\%$ & Large negative signal; unstable with four days.\\
-Sunday & 4 & 6.36\% & 10.37\% & $+63.0\%$ & Large positive signal; unstable with four days.\\
-\botrule
-\end{tabular}
-\end{table}
-
-The weekday table is useful because it tells the analyst where to look next. It does not justify a recommendation such as deploying the Test variant on Sunday or disabling it on Saturday. A valid temporal-deployment claim would require a new experiment that pre-registers weekday as a moderator, runs for a longer period, preserves the randomisation unit, and records traffic-source and device covariates.
+Because of this sparsity, the weekday analysis is presented visually in Figure~\ref{fig:hte_wd} to highlight the uncertainty, rather than as a definitive calendar-based deployment rule. It does not justify a recommendation such as deploying the Test variant on Sunday or disabling it on Saturday. A valid temporal-deployment claim would require a new experiment that pre-registers weekday as a moderator, runs for a longer period, preserves the randomisation unit, and records traffic-source covariates.
 
 \begin{figure}[!htbp]
 \centering
@@ -404,9 +385,9 @@ These limitations are not treated as afterthoughts. They are the reason for the 
 \section{Conclusion}\label{sec:conclusion}
 %==============================================================
 
-This paper re-analysed a public checkout-page A/B testing dataset as a case study in validity diagnostics and cautious interpretation. The pooled click-level comparison suggests that the Test variant has lower purchase-per-click than Control. Yet this conclusion weakens when daily variation, sample-ratio ambiguity, A/A non-exchangeability, and post-treatment funnel conditioning are taken seriously.
+This paper re-analysed a public dataset commonly presented as a checkout A/B test, but which fundamentally reflects a comparison of two aggregate marketing campaigns. The pooled click-level comparison suggests that the Test campaign yields lower conversion among clickers than Control. Yet this conclusion vanishes when the massive daily overdispersion inherent to marketing campaigns, sample-ratio ambiguity, A/A non-exchangeability, and post-treatment funnel conditioning are taken into account.
 
-The central conclusion is methodological. Daily aggregate A/B datasets can reveal warning signs and generate hypotheses, but they cannot replace a properly logged experiment. The most defensible next step is not an immediate rollout decision. It is a cleaner follow-up experiment with documented randomisation, user/session identifiers, pre-specified funnel metrics, and enough duration to evaluate temporal heterogeneity.
+The central conclusion is methodological. Daily aggregate datasets can reveal compositional confounding and generate hypotheses, but they cannot replace a properly logged, unit-level experiment. The observed overdispersion completely invalidates standard independent-trials inference on such data. The most defensible next step is not an immediate rollout decision, but rather a cleaner follow-up experiment with documented randomisation, user/session identifiers, pre-specified funnel metrics, and robust statistical models that account for cluster-level noise.
 
 \FloatBarrier
 %==============================================================
@@ -414,7 +395,7 @@ The central conclusion is methodological. Daily aggregate A/B datasets can revea
 
 \bmhead{Code and data availability}
 
-All code and data references should be provided in the final submission repository. The current manuscript uses a public aggregate dataset and should include the exact dataset URL before submission.
+All replication code for this re-analysis, along with the data processing pipelines and validity diagnostics, are available at \url{https://github.com/Dawn2310/Checkout-ab-validity-diagnostics}.
 
 \bmhead{Acknowledgements}
 
@@ -424,9 +405,9 @@ The authors thank colleagues and reviewers for helpful feedback.
 \begin{itemize}
 \item \textbf{Funding}: not applicable.
 \item \textbf{Conflict of interest}: the authors declare no competing interests.
-\item \textbf{Data availability}: the dataset is publicly available; the exact URL should be inserted before submission.
-\item \textbf{Code availability}: the repository URL should be inserted before submission.
-\item \textbf{Author contributions}: Nguyen Luong Hai Dang: conceptualisation, methodology, analysis, writing - original draft. Duong Quoc Huu: review and editing. Nguyen Thi Thanh Tien: review and editing. These roles should be confirmed before submission.
+\item \textbf{Data availability}: the dataset is publicly available on Kaggle (\url{https://www.kaggle.com/datasets/faviovaz/marketing-ab-testing}).
+\item \textbf{Code availability}: replication code is available at \url{https://github.com/Dawn2310/Checkout-ab-validity-diagnostics}.
+\item \textbf{Author contributions}: Nguyen Luong Hai Dang: conceptualisation, methodology, analysis, writing - original draft. Duong Quoc Huu: review and editing. Nguyen Thi Thanh Tien: review and editing.
 \end{itemize}
 
 \FloatBarrier

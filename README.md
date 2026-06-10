@@ -1,92 +1,52 @@
-# What Can Be Learned from a Daily-Aggregate Checkout A/B Test?
-**Validity Diagnostics, Funnel Decomposition, and Limits of Causal Interpretation**
+# What Can Be Learned from Aggregate Marketing Campaigns?
 
-This repository contains the code, datasets, and a manuscript re-analysing a public daily-aggregate e-commerce A/B testing dataset for a checkout-page redesign. Instead of a standard conversion-rate optimisation (CRO) playbook, this project is framed as a **methodological caution**. 
+**Validity Diagnostics, Overdispersion, and Limits of Causal Interpretation**
 
-We demonstrate how a seemingly decisive pooled conversion-rate result becomes fragile when the analyst accounts for design ambiguity, time aggregation, post-treatment selection into clicks, and sparse subgroup evidence.
+This repository contains the replication code, data processing pipeline, and final diagnostic manuscript for a re-analysis of a public Kaggle dataset. Originally framed as a "checkout-page redesign A/B test", we demonstrate that the dataset structurally resembles a comparison of two aggregate marketing campaigns, and that a naive binomial interpretation of the results drastically underestimates the true noise level due to daily overdispersion.
 
-## Project Structure
+## 🎯 Overview
 
-```text
-.
-├── main.py                     # End-to-end pipeline entry point
-├── requirements.txt
-├── dataset/                    # Raw CSVs (semicolon-separated)
-│   ├── control_group.csv
-│   └── test_group.csv
+Public A/B testing datasets often contain massive click counts but missing metadata (e.g., randomisation unit, tracking context). This project uses robust statistical checks to prove that taking such datasets at face value leads to false confidence. 
+
+Key findings:
+1. **Overdispersion**: Treating daily clicks as independent trials yields a $p < 10^{-30}$ effect for the Test campaign. However, applying a Quasi-Binomial GLM shows that the variance is inflated by roughly $163\times$. Correcting for this overdispersion makes the difference completely **non-significant** ($p = 0.342$).
+2. **A/A Simulation**: Simulating random splits of the Control group yields an 87.8% False Positive Rate under standard independent-trials inference, highlighting that daily aggregate rows are not exchangeable experimental replicates.
+3. **Compositional Selection Bias**: A funnel analysis shows the Test campaign drives massively higher click-through rates but lower cart and purchase progression. We interpret this as a traffic composition shift (bringing in lower-intent visitors) rather than a causal mid-funnel UI friction.
+
+## 🛠 Project Structure
+
+```
+├── dataset/                  # Raw daily CSV files (Control & Test campaigns)
+├── output/
+│   ├── processed/            # Cleaned data
+│   ├── figures/              # Plots (SRM, Funnel Waterfall, A/A simulations)
+│   └── statistical_results.txt # Full text output of pipeline
+├── paper/
+│   ├── manuscript.md         # The main markdown manuscript of the paper
+│   └── references.bib        # References
 ├── src/
-│   ├── config.py               # Paths and constants
-│   ├── data_processing.py      # Module 01 — load, clean, feature engineering
-│   ├── eda.py                  # Module 02 — exploratory data analysis
-│   ├── analysis.py             # Module 03 — statistical inference
-│   ├── ab_diagnostics.py       # Module 04 — validity checks (SRM, A/A simulation)
-│   ├── cuped.py                # Module 05 — CUPED variance reduction (Delta method)
-│   ├── hte_analysis.py         # Module 06 — heterogeneous treatment effects
-│   ├── causal_ml.py            # Module 07 — pseudo-session uplift simulation
-│   └── visualization.py        # Module 08 — paper-ready figures
-├── paper/                      
-│   ├── manuscript.md           # The detailed manuscript draft
-│   ├── references.bib          # Bibliography
-│   └── manuscript/             # LaTeX templates and resources
-└── output/                     # Generated artifacts (gitignored by default)
-    ├── statistical_results.txt
-    ├── tables/                 
-    └── figures/                # All generated plots (PDF format)
+│   ├── data_processing.py    # Load and merge CSVs
+│   ├── analysis.py           # Quasi-binomial GLM, Classical inference
+│   ├── ab_diagnostics.py     # SRM, A/A simulations
+│   └── plotting.py           # Generating visualizations
+├── main.py                   # Orchestrator pipeline
+└── README.md
 ```
 
-## Core Contributions & Findings
+## 🚀 How to Run
 
-1. **Unit-of-Analysis Paradox**: We show that while a click-pooled $Z$-test yields a highly significant negative effect for the Test variant ($p < 10^{-30}$), this result evaporates when calendar days are treated as the effective unit of variation.
-2. **Sample Ratio Mismatch (SRM)**: We detect a severe mismatch in traffic allocation. Because the randomisation unit is undocumented, this serves as an ambiguity warning rather than definitive proof of broken randomisation.
-3. **A/A Simulation on Aggregate Data**: We simulate A/A tests by splitting Control days. The empirical false-positive rate balloons to $87.8\%$, proving that daily aggregate rows do not behave like exchangeable experimental replicates.
-4. **Acquisition–Conversion Trade-off**: Funnel decomposition reveals that the Test variant generates more clicks but lowers downstream progression among clickers. We emphasise that this is a compositional change (selection bias), not necessarily direct evidence of mid-funnel friction.
-5. **Exploratory Weekday Heterogeneity**: We map out potential sign reversals by weekday (e.g., Test performs well on Sunday, poorly on Saturday), but explicitly bound these claims due to the small 30-day sample size.
+1. Make sure you have `pandas`, `scipy`, `statsmodels`, and `matplotlib` installed.
+   ```bash
+   pip install pandas scipy statsmodels matplotlib
+   ```
+2. Run the main orchestrator script:
+   ```bash
+   python main.py
+   ```
+3. Check the `output/` directory for the newly generated `.txt` reports and `.png` figures.
 
-## Quick Start
+## 📖 The Manuscript
 
-```bash
-git clone https://github.com/Dawn2310/Checkout-ab-validity-diagnostics.git
-cd Checkout-ab-validity-diagnostics
+The full analysis and methodological discussion are written up as a research manuscript in `paper/manuscript.md`. This manuscript warns against making causal product deployment decisions from incomplete, daily-aggregate data without rigorous overdispersion modeling.
 
-# Create and activate virtual environment
-python -m venv .venv
-# On Windows:
-.venv\Scripts\activate
-# On macOS/Linux:
-source .venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the complete pipeline
-python main.py
-```
-
-The pipeline runs sequentially and writes all tables, statistical summaries, and PDF figures to the `output/` directory.
-
-## Methods Implemented
-
-### Validity Diagnostics
-- **Sample Ratio Mismatch (SRM)** chi-square sensitivity analysis across reference allocations.
-- **A/A simulation** on historical Control splits to diagnose empirical FPR.
-- **Outlier-day** detection.
-
-### Statistical Inference
-- **Two-proportion Z-test** on overall CR.
-- **Welch t-test** and **Mann-Whitney U** on daily CR.
-- **Delta-method approximation** for ratio metrics.
-- **Bootstrap percentile CIs** (10,000 iterations) over daily resamples.
-- **Funnel-stage comparisons** with Holm multiple-test correction.
-
-### Advanced Modeling
-- **CUPED** variance reduction adapted for day-level data.
-- **HTE by weekday & spend tier** with Wilson CIs and forest plots.
-- **Uplift Meta-learners** (S/T/X-learner) evaluated via Qini curves (implemented as a simulation exercise in pseudo-sessions).
-
-## Data and Limitations
-
-The raw data (`dataset/`) consists of 30 days of campaign metrics per variant. Because the dataset lacks documentation on the randomisation unit, intended allocation ratio, and session boundaries, it cannot support confident causal rollout decisions. It serves primarily as a pedagogical tool for A/B testing validity diagnostics.
-
-## License
-
-MIT
+*Note: LaTeX source files and PDFs are intentionally excluded from this repository.*

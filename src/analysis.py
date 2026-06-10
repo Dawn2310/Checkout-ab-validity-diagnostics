@@ -9,6 +9,7 @@ Implements:
   - Post-hoc power analysis (zt_ind_solve_power)
   - Required sample-size (MDE = 5%, 10%, 15% relative)
   - Logistic regression: purchase ~ group (clicks weighted)
+  - Quasi-Binomial GLM to estimate and correct for overdispersion
   - OLS: revenue_per_session ~ group + weekday
   - Funnel-step breakdown z-tests (multiple-test via Holm correction)
 """
@@ -163,6 +164,43 @@ def logistic_regression(agg: pd.DataFrame) -> dict:
     }
 
 
+# ---------- Quasi-Binomial GLM (Overdispersion correction) ----------
+def quasi_binomial_glm(combined: pd.DataFrame) -> dict:
+    """Fit a GLM with Binomial family and scale='X2' to correct for overdispersion.
+    This replaces the naive pooled-binomial assumption.
+    """
+    df = combined.copy()
+    df["is_test"] = (df["group"] == "Test").astype(int)
+    
+    # We must use conversion rate as the response, and total trials as var_weights
+    cr = df["purchase"] / df["clicks"]
+    trials = df["clicks"]
+    
+    X = sm.add_constant(df["is_test"])
+    
+    # Standard Binomial GLM (no overdispersion correction)
+    model_std = sm.GLM(cr, X, family=sm.families.Binomial(), var_weights=trials)
+    res_std = model_std.fit()
+    
+    # Quasi-Binomial GLM (scale SEs by Pearson chi2)
+    model_qb = sm.GLM(cr, X, family=sm.families.Binomial(), var_weights=trials)
+    res_qb = model_qb.fit(scale="X2")
+    
+    # Get the dispersion parameter (Pearson chi2 / df_resid)
+    dispersion = res_qb.scale
+    
+    return {
+        "summary_std": str(res_std.summary()),
+        "summary_qb": str(res_qb.summary()),
+        "coef_is_test_qb": res_qb.params["is_test"],
+        "p_value_is_test_std": res_std.pvalues["is_test"],
+        "p_value_is_test_qb": res_qb.pvalues["is_test"],
+        "dispersion_scale": dispersion,
+        "pearson_chi2": res_qb.pearson_chi2,
+        "df_resid": res_qb.df_resid
+    }
+
+
 # ---------- OLS revenue per session ----------
 def ols_revenue(combined: pd.DataFrame) -> dict:
     df = combined.copy()
@@ -224,6 +262,7 @@ def run(combined: pd.DataFrame, agg: pd.DataFrame) -> dict:
         "bootstrap": bootstrap_uplift_ci(combined),
         "power": power_and_sample_size(agg),
         "logit": logistic_regression(agg),
+        "quasi_binomial": quasi_binomial_glm(combined),
         "ols_rps": ols_revenue(combined),
         "funnel_steps": funnel_step_tests(agg),
     }
@@ -300,24 +339,35 @@ def _write_report(res: dict) -> None:
 
     lg = res["logit"]
     lines += [
-        "[7] LOGISTIC REGRESSION — purchase ~ is_test",
+        "[7] LOGISTIC REGRESSION — purchase ~ is_test (Naive)",
         f"  Coef(is_test) = {lg['coef_is_test']:.4f}  p = {lg['p_value_is_test']:.6f}",
         f"  Odds Ratio    = {lg['odds_ratio']:.4f}  "
         f"95% CI = [{lg['or_ci_95'][0]:.4f}, {lg['or_ci_95'][1]:.4f}]",
         f"  Pseudo R^2    = {lg['pseudo_r2']:.6f}",
         "",
     ]
+    
+    qb = res["quasi_binomial"]
+    lines += [
+        "[8] QUASI-BINOMIAL GLM — OVERDISPERSION CORRECTION",
+        f"  Standard p-value (is_test) = {qb['p_value_is_test_std']:.6e}",
+        f"  Pearson chi2 = {qb['pearson_chi2']:.2f}  (df = {qb['df_resid']})",
+        f"  Estimated Dispersion Scale = {qb['dispersion_scale']:.4f}",
+        f"  Quasi-Binomial p-value (is_test) = {qb['p_value_is_test_qb']:.6f}",
+        f"  => Variance is inflated by ~{qb['dispersion_scale']:.1f}x compared to naive binomial.",
+        "",
+    ]
 
     ol = res["ols_rps"]
     lines += [
-        "[8] OLS — revenue_per_session ~ is_test + weekday",
+        "[9] OLS — revenue_per_session ~ is_test + weekday",
         f"  Coef(is_test) = {ol['coef_is_test']:.4f}  p = {ol['p_value_is_test']:.6f}",
         f"  R^2 = {ol['r_squared']:.4f}",
         "",
     ]
 
     fs = res["funnel_steps"]
-    lines += ["[9] FUNNEL-STEP TESTS (Holm-corrected)"]
+    lines += ["[10] FUNNEL-STEP TESTS (Holm-corrected)"]
     lines += [fs.to_string(index=False), ""]
 
     lines += ["=" * 70,

@@ -1,0 +1,3 @@
+group,campaign,date,spend,impressions,reach,clicks,searches,view_content,add_to_cart,purchase,ctr,view_rate,atc_rate,cr,purchase_rate,revenue,revenue_per_session,cpa,roas
+Control,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Test,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0

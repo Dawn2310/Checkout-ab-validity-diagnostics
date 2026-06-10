@@ -1,0 +1,66 @@
+======================================================================
+A/B TESTING — STATISTICAL REPORT
+======================================================================
+
+[1] OVERALL CONVERSION RATE — Two-proportion Z-test
+  CR Control = 9.8502%  (95% Wilson CI: 9.7039% – 9.9984%)
+  CR Test    = 8.6407%  (95% Wilson CI: 8.5121% – 8.7710%)
+  Absolute uplift = -1.2095%
+  Relative uplift = -12.28%
+  z = -12.1391    p-value = 0.000000
+  => SIGNIFICANT at alpha=0.05
+
+[2] DAILY CR — Welch t-test & Mann-Whitney U
+  mean(Control)=11.4644%  mean(Test)=9.2312%
+  Welch t = -1.5178  p = 0.135327
+  MW U    = 375.0     p = 0.270699
+  Cohen's d = -0.3919
+
+[3] DAILY REVENUE PER SESSION — Welch t-test & Mann-Whitney U
+  mean(Control)=$5.732  mean(Test)=$4.616
+  Welch t = -1.5178  p = 0.135327
+  MW U    = 375.0     p = 0.270699
+  Cohen's d = -0.3919
+
+[4] CHI-SQUARE — group × purchase (2×2)
+  chi2 = 147.2136  dof = 1  p = 0.000000
+
+[5] BOOTSTRAP CI (10000 iters)
+  absolute uplift  mean = -1.2515%  95% CI = [-3.7155%, +1.0775%]
+  relative uplift  mean = -11.76%  95% CI = [-32.19%, +12.71%]
+
+[6] POWER ANALYSIS
+  Observed effect size (Cohen h) = -0.0418
+  Post-hoc power = 1.0000  (adequate)
+  Required n/group for 80% power:
+      mde_5pct: 58,735
+      mde_10pct: 14,995
+      mde_15pct: 6,801
+
+[7] LOGISTIC REGRESSION — purchase ~ is_test (Naive)
+  Coef(is_test) = -0.1443  p = 0.000000
+  Odds Ratio    = 0.8656  95% CI = [0.8456, 0.8860]
+  Pseudo R^2    = 0.000707
+
+[8] QUASI-BINOMIAL GLM — OVERDISPERSION CORRECTION
+  Standard p-value (is_test) = 7.215324e-34
+  Pearson chi2 = 9451.33  (df = 58)
+  Estimated Dispersion Scale = 162.9539
+  Quasi-Binomial p-value (is_test) = 0.341947
+  => Variance is inflated by ~163.0x compared to naive binomial.
+
+[9] OLS — revenue_per_session ~ is_test + weekday
+  Coef(is_test) = -1.1166  p = 0.132392
+  R^2 = 0.1500
+
+[10] FUNNEL-STEP TESTS (Holm-corrected)
+         step  rate_control  rate_test  abs_diff  rel_diff          z         p_raw        p_holm  significant_holm
+          ctr      0.048419   0.080879  0.032460  0.670386 155.353512  0.000000e+00  0.000000e+00              True
+    view_rate      0.364445   0.308007 -0.056438 -0.154861 -34.710918 5.391719e-264 1.078344e-263              True
+     atc_rate      0.677971   0.474453 -0.203518 -0.300187 -69.275296  0.000000e+00  0.000000e+00              True
+purchase_rate      0.398658   0.591280  0.192623  0.483179  48.385964  0.000000e+00  0.000000e+00              True
+           cr      0.098502   0.086407 -0.012095 -0.122790 -12.139123  6.552417e-34  6.552417e-34              True
+
+======================================================================
+CONCLUSION: see overall_cr p-value & bootstrap CI above.
+======================================================================
