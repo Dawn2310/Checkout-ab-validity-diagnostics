@@ -1,10 +1,10 @@
 # References folder — A/B Testing Checkout Page
 
-Tổng cộng **10 papers PDF** + `references.bib` đầy đủ.
+A total of **10 PDF papers** + complete `references.bib`.
 
-## Mapping PDF → cấu trúc bài báo
+## Mapping PDF → Paper Structure
 
-| PDF | Dùng cho phần |
+| PDF | Used For |
 |---|---|
 | Kohavi2009_ControlledExperimentsOnTheWeb.pdf | Related Work, Methodology baseline |
 | OCE_Personalised_Ecommerce.pdf | Related Work — checkout/personalised |
@@ -15,9 +15,9 @@ Tổng cộng **10 papers PDF** + `references.bib` đầy đủ.
 | Yu2018_FDR_HTE_OCE.pdf | Moderator analysis — multiple testing |
 | Bayesian_ABTesting_Business.pdf | Alternative inference (optional) |
 | Uplift_Multiple_Treatments.pdf | Uplift modeling |
-| Incremental_Profit_Uplift_Ecom.pdf | Revenue uplift — chính là metric của bài |
+| Incremental_Profit_Uplift_Ecom.pdf | Revenue uplift — the core metric of the paper |
 
-## Các paper Q1 cần đọc thêm trên ScienceDirect (yêu cầu account)
+## Q1 Papers for Further Reading on ScienceDirect (Account Required)
 
 - McDowell et al. (2016) *Journal of Business Research* — retail website design & conversion
 - Huang et al. (2018) *Journal of Retailing and Consumer Services* — mobile checkout abandonment
