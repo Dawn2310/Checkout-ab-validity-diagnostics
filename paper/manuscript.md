@@ -194,7 +194,7 @@ Overall conversion rate & Purchases / clicks & Primary descriptive outcome among
 
 \subsection{Aggregate and day-level inference}\label{subsec:methods-classical}
 
-We report the click-pooled two-proportion $Z$-test because it is the standard first analysis for a binary conversion outcome. However, we do not treat it as sufficient. We also report Welch's $t$-test and Mann--Whitney tests on daily conversion rates, and bootstrap intervals over daily resamples \cite{davison1997bootstrap}. The purpose of presenting both views is to expose the analysis-unit tension: clicks create a large denominator, whereas days represent the only replicated units directly visible in the public data.
+We report the click-pooled two-proportion $Z$-test because it is the standard first analysis for a binary conversion outcome. However, we do not treat it as sufficient. We also report Welch's $t$-test on daily conversion rates and bootstrap intervals over daily resamples \cite{davison1997bootstrap}. The purpose of presenting both views is to expose the analysis-unit tension: clicks create a large denominator, whereas days represent the only replicated units directly visible in the public data.
 
 For ratio metrics, the relevant day-level uncertainty can be expressed through the delta method. If $N_d$ denotes purchases and $D_d$ denotes clicks on day $d$, the rate is $R=N/D$. A first-order approximation is
 \begin{equation}
@@ -206,11 +206,11 @@ To formalise the day-to-day variance, we fit a quasi-binomial Generalized Linear
 
 \subsection{Validity diagnostics}\label{subsec:methods-validity}
 
-We examine sample ratio mismatch under several reference allocations rather than only a 50/50 split:
+We examine sample ratio mismatch under a 50/50 reference allocation as a baseline diagnostic:
 \begin{equation}
 \chi^{2}_{\mathrm{SRM}} = \sum_{a\in\{C,T\}} \frac{(n_{a} - n p_{a})^{2}}{n p_{a}}.
 \end{equation}
-Here, $n_a$ is the observed click count in arm $a$, and $p_a$ is a reference allocation share. Because the true allocation is unavailable, the result is not a definitive randomisation-failure test. It is a sensitivity analysis showing which allocation assumptions would make the observed click split surprising.
+Here, $n_a$ is the observed click count in arm $a$, and $p_a$ is a reference allocation share (here, 0.5). Because the true allocation is unavailable, the result is not a definitive randomisation-failure test. It is a diagnostic showing whether the observed click split would be surprising if an equal allocation had been intended.
 
 We also run an A/A simulation. In each simulation, Control days were randomly split into two pseudo-arms, their clicks and purchases were pooled within each pseudo-arm, and a two-proportion $Z$-test was applied. This simulation does not imply that all pooled tests are flawed; rather, it demonstrates that naive pooled inference on daily aggregate data is severely biased due to day-level clustering and non-exchangeability. A highly non-uniform A/A $p$-value distribution indicates that daily rows are not a reliable basis for replicated causal inference.
 
