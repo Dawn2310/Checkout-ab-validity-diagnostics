@@ -159,7 +159,7 @@ Randomisation unit & Determines whether clicks, sessions, users, campaigns, or d
 Intended allocation ratio & Required for a formal SRM pass/fail interpretation. & SRM is interpreted as an ambiguity warning, with sensitivity to plausible reference splits.\\
 User/session identifiers & Needed to separate repeated behaviour from independent observations. & No individual-level targeting or user-level causal heterogeneity is claimed.\\
 Traffic-source and device mix & Needed to distinguish treatment effects from compositional changes in the audience. & Funnel and weekday patterns are treated as hypotheses, not deployment rules.\\
-Pre-treatment covariates & Needed for strong CUPED adjustment and robust uplift modelling. & CUPED is a sensitivity check only; pseudo-session uplift is not used as main evidence.\\
+Pre-treatment covariates & Needed for strong CUPED adjustment and robust uplift modelling. & CUPED is a sensitivity check only; individual-level uplift modelling is not used as main evidence.\\
 \botrule
 \end{tabular}
 \end{table}
