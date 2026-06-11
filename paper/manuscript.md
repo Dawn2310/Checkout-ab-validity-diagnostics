@@ -56,12 +56,13 @@
 \author*[1]{\fnm{Nguyen Luong Hai} \sur{Dang}}\email{nguyenluonghaidang2006pq@gmail.com}
 \author[1]{\fnm{Duong Quoc} \sur{Huu}}
 \author[1]{\fnm{Nguyen Thi Thanh} \sur{Tien}}
+\author[1]{\fnm{Nguyen Hoang} \sur{Linh}}
 
 \affil*[1]{\orgdiv{Faculty of Artificial Intelligence},
 \orgname{FPT University},
 \orgaddress{\country{Vietnam}}}
 
-\abstract{This study re-analyses a public daily-aggregate e-commerce dataset commonly framed as a checkout A/B test, but which structurally resembles a comparison of two aggregate marketing campaigns. The paper serves as a methodological caution rather than a direct product-deployment recommendation. The dataset contains large click counts but only paired daily aggregates and lacks documentation of the randomisation unit, intended allocation ratio, user identifiers, traffic-source composition, and session boundaries. These missing design details make a naive causal interpretation unsafe. We combine aggregate conversion-rate comparison with day-level robustness checks, sample-ratio-mismatch diagnostics, overdispersion modelling (quasi-binomial GLM), and funnel-stage decomposition. The click-pooled comparison suggests that the Test variant has lower overall conversion than Control, but this result is no longer statistically supported when calendar days are treated as the effective unit of variation and overdispersion is accounted for. Funnel decomposition reveals an acquisition--conversion contrast: the Test variant generates more clicks but has lower downstream progression. This pattern is more plausibly interpreted as compositional confounding (attracting a lower-intent audience via ads) than as direct evidence of mid-funnel checkout friction. Validity diagnostics further show that the daily variance is inflated by roughly 163$\times$ compared to a naive binomial assumption, driving an extreme false-positive rate in A/A simulations. The main contribution is therefore diagnostic: daily aggregate datasets can be useful for detecting fragility and compositional confounding, but they require robust overdispersion modelling and cannot by themselves support confident causal rollout decisions without unit-level tracking.}
+\abstract{This study re-analyses a public daily-aggregate e-commerce dataset commonly framed as a checkout A/B test, but which structurally resembles a comparison of two aggregate marketing campaigns. The paper serves as a methodological caution rather than a direct product-deployment recommendation. The dataset contains large click counts but only paired daily aggregates and lacks documentation of the randomisation unit, intended allocation ratio, user identifiers, traffic-source composition, and session boundaries. These missing design details make a naive causal interpretation unsafe. We combine aggregate conversion-rate comparison with day-level robustness checks, sample-ratio-mismatch diagnostics, overdispersion modelling (quasi-binomial GLM), and funnel-stage decomposition. The click-pooled comparison suggests that the Test variant has lower overall conversion than Control, but this result is no longer statistically supported when calendar days are treated as the effective unit of variation and overdispersion is accounted for. Funnel decomposition reveals an acquisition--conversion contrast: the Test variant generates more clicks but has lower downstream progression. This pattern is more plausibly interpreted as compositional confounding (attracting a lower-intent audience via ads) than as direct evidence of mid-funnel checkout friction. Validity diagnostics further show that the daily variance is inflated by roughly 163$\times$ compared to a naive binomial assumption, driving an extreme false-positive rate in A/A simulations. The central conclusion is methodological. Daily aggregate datasets can be useful for detecting fragility and compositional confounding, but they require robust overdispersion modelling.}
 
 \keywords{A/B testing, Conversion rate optimisation, Marketing campaigns,
 Overdispersion, Funnel decomposition, Sample ratio mismatch,
@@ -87,7 +88,7 @@ We address three research questions:
 \item[\textbf{RQ3}] What descriptive funnel and temporal patterns appear, and why should they be treated as hypothesis-generating rather than causal?
 \end{enumerate}
 
-The contribution of the paper is not a claim that the Test campaign should be deployed or rejected. Rather, the contribution is a structured diagnostic reading of a poorly documented aggregate experiment. The analysis shows how an apparently decisive pooled conversion-rate result becomes fragile once the analyst accounts for design ambiguity, time aggregation, post-treatment selection into clicks, and sparse subgroup evidence. This reframing turns the dataset from a simple conversion-rate exercise into a case study on the limits of causal interpretation in public A/B testing data.
+The primary contribution of this paper is methodological: a structured diagnostic reading of a poorly documented aggregate experiment. The analysis shows how an apparently decisive pooled conversion-rate result becomes fragile once the analyst accounts for design ambiguity, time aggregation, post-treatment selection into clicks, and sparse subgroup evidence. This reframing turns the dataset from a simple conversion-rate exercise into a case study on the limits of causal interpretation in public A/B testing data.
 
 %==============================================================
 \section{Related Work}\label{sec:related}
@@ -202,7 +203,7 @@ For ratio metrics, the relevant day-level uncertainty can be expressed through t
 \end{equation}
 which highlights that variation in the numerator and denominator should be considered jointly \cite{deng2018applying}. With only daily aggregates, this approximation is informative but still cannot replace the missing randomisation unit.
 
-To formalise the day-to-day variance, we fit a quasi-binomial Generalized Linear Model (GLM). The outcome is the number of purchases over the number of clicks, modelled by the variant indicator. Unlike a naive binomial model, the quasi-binomial approach estimates a dispersion scale parameter from the Pearson chi-square statistic divided by the residual degrees of freedom. This scales the standard errors to account for the unobserved daily shocks common in aggregate campaign data, making it far more appropriate than assuming independent Bernoulli trials.
+To formalise the day-to-day variance, we fit a quasi-binomial Generalized Linear Model (GLM). The outcome is the number of purchases over the number of clicks, modelled by the variant indicator. Unlike a naive binomial model, the quasi-binomial approach estimates a dispersion scale parameter from the Pearson chi-square statistic divided by the residual degrees of freedom. This scales the standard errors to account for the unobserved daily shocks common in aggregate campaign data, making it far more appropriate than assuming independent Bernoulli trials. Furthermore, at the day level with $n \approx 30$ observations per arm and an observed absolute standard error of roughly \SI{0.8}{\percent}, the minimal detectable effect (MDE) for 80\% power is approximately \SI{2.2}{\percent} in absolute terms (a relative gap of over \SI{20}{\percent}). The day-level design is therefore severely underpowered to detect typical campaign effects, further explaining why the descriptive click-pooled difference becomes statistically indistinguishable from noise.
 
 \subsection{Validity diagnostics}\label{subsec:methods-validity}
 
@@ -255,7 +256,7 @@ The key analytical point is that the table does not settle the causal question. 
 \toprule
 Check & Result & Interpretation\\
 \midrule
-Estimated dispersion scale & $162.95$ & Variance is inflated roughly 163$\times$ compared to a naive binomial model.\\
+Dispersion scale parameter & $162.95$ & In the quasi-binomial GLM, the variance is scaled by approximately 163$\times$ compared to a naive binomial model.\\
 Quasi-Binomial GLM $p$-value & $p=0.342$ & The conversion difference is entirely non-significant after correcting for overdispersion.\\
 Daily Welch $t$-test & $t=-1.518$; $p=0.135$ & The daily-rate difference is not significant at the 5\% level.\\
 Bootstrap CI for relative uplift & $[-32.19\%, +12.71\%]$ & The daily-resampled interval crosses zero.\\
@@ -273,7 +274,11 @@ This contrast is the first main finding. The dataset supports a descriptive stat
 
 \subsection{Funnel decomposition reveals a compositional puzzle, not a direct mechanism}\label{subsec:results-funnel}
 
-The funnel analysis reveals why the aggregate result is difficult to interpret. The Test variant has a much higher click-through rate, but lower view-content and add-to-cart progression among the users who enter the funnel. Among users who reach the cart, the Test arm has a higher purchase-given-cart rate. A superficial reading would say that the Test campaign improves attraction and late purchase completion but damages the middle of the funnel. The more rigorous reading is weaker and more useful: the Test campaign changes the composition of the users observed at each conditional stage.
+The funnel analysis reveals why the aggregate result is difficult to interpret. The Test variant has a much higher click-through rate, but lower view-content and add-to-cart progression among the users who enter the funnel. Among users who reach the cart, the Test arm has a higher purchase-given-cart rate. A superficial reading would say that the Test campaign improves attraction and late purchase completion but damages the middle of the funnel.
+
+Crucially, the $+67.0\%$ relative gap in click-through rate (CTR) is structurally incompatible with a within-page checkout redesign. A redesign that users only see \emph{after} they reach the website cannot retroactively cause them to click the upstream ad at a higher rate. This CTR gap alone strongly suggests the dataset compares two distinct marketing campaigns rather than a localised on-page test.
+
+Consequently, the more rigorous reading is compositional. By increasing click-through rate, the Test campaign changes the composition of the users observed at each conditional stage.
 
 \begin{table}[!htbp]
 \caption{Funnel-stage differences with explicit interpretation limits. Tests use two-proportion comparisons with Holm correction.}\label{tab:funnel}
@@ -296,7 +301,7 @@ The observed pattern is consistent with at least two different stories. One stor
 \begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.78\textwidth]{figures/uplift_waterfall.png}
-\caption{Relative differences by funnel step, Test versus Control.}\label{fig:waterfall}
+\caption{Relative differences by funnel step. The sign reversal between CTR ($+67.0\%$) and view-content ($-15.5\%$) is consistent with a compositional shift rather than a stage-specific design effect.}\label{fig:waterfall}
 \end{figure}
 
 \subsection{Validity diagnostics show that the experiment cannot be read as a clean independent-trials test}\label{subsec:results-validity}
@@ -351,7 +356,7 @@ This distinction makes the paper more useful for methodology. A weak public data
 
 \subsection{Why conditioning on clicks changes the meaning of funnel results}\label{subsec:disc-selection}
 
-The most important interpretive change concerns the funnel. It is tempting to say that the Test variant ``creates mid-funnel friction'' because add-to-cart progression is lower. The revised manuscript avoids that claim. If the Test variant increases click-through rate, it may bring in a different mix of users. Some of these additional clickers may be curious, low-intent, or campaign-driven visitors. Lower downstream rates among that expanded clicker set would then be a compositional consequence of top-of-funnel expansion, not necessarily a defect in the checkout design.
+The most important interpretive change concerns the funnel. It is tempting to say that the Test variant ``creates mid-funnel friction'' because add-to-cart progression is lower. The revised manuscript avoids that claim by elevating the problem of ``selection on clicks.'' In a causal directed acyclic graph (DAG), the structure is $\text{Treatment} \rightarrow \text{Click} \rightarrow \text{Post-click rate}$. Because we can only observe downstream rates conditionally, \emph{Click} acts as a collider. If the Test variant increases click-through rate, it may bring in a different mix of users. Some of these additional clickers may be curious, low-intent, or campaign-driven visitors. Lower downstream rates among that expanded clicker set would then be a compositional consequence of top-of-funnel expansion, not necessarily a defect in the checkout design.
 
 This does not make funnel analysis useless. It makes it a source of hypotheses rather than proof of mechanism. A follow-up study should either randomise at the relevant funnel entry point, retain user/session identifiers, or use a compositional framework that explicitly accounts for selection into post-treatment stages. Without that, stage-level differences should be described as observed conditional differences rather than causal effects of specific page components.
 
@@ -378,18 +383,18 @@ In this dataset, the safest product recommendation is therefore conservative. Th
 \section{Limitations}\label{sec:limitations}
 %==============================================================
 
-This study has four main limitations. First, the dataset lacks the randomisation unit, intended allocation ratio, user identifiers, session boundaries, and traffic-source covariates. This prevents strong causal product conclusions. Second, the time window is short, so weekday patterns are unstable and may reflect ordinary campaign variation rather than treatment heterogeneity. Third, revenue is unavailable; any constant-average-order-value calculation would only rescale conversion rate and is therefore omitted from the main analysis. Fourth, because the data are aggregated by day and variant, individual-level uplift modelling is not appropriate as main evidence.
+This study has four main limitations regarding the specific dataset. First, it lacks the randomisation unit, allocation ratio, and session boundaries. Second, the 30-day time window is too short for stable weekday inference. Third, revenue is unavailable. Fourth, daily aggregation prevents individual-level uplift modelling.
 
-These limitations are not treated as afterthoughts. They are the reason for the paper's revised framing. The manuscript uses the dataset to demonstrate how to diagnose fragility in aggregate A/B testing data, not to claim a deployable campaign or checkout optimisation rule. To definitively resolve these structural ambiguities, future studies must collaborate with platform providers to obtain raw, session-level event logs rather than daily aggregates. Having access to unique session identifiers and explicit exposure timestamps would solve the unit-of-analysis paradox, allow for accurate clustered standard errors, and cleanly distinguish between true randomisation failures (SRM) and post-treatment click-through inflation.
+However, these limitations motivate the broader contribution: the ``claim boundary'' framework (Table~\ref{tab:claim-boundary}). This framework is not limited to this single dataset; it generalizes directly to other public datasets in the literature that suffer from similar aggregate ambiguity (e.g., Criteo uplift datasets, Kaggle marketing datasets). The manuscript demonstrates how to diagnose fragility in such aggregate data. To definitively resolve these structural ambiguities, future experimental studies must collaborate with platform providers to obtain raw, session-level event logs. Having access to unique session identifiers and explicit exposure timestamps would solve the unit-of-analysis paradox, allow for accurate clustered standard errors, and cleanly distinguish between true randomisation failures (SRM) and post-treatment click-through inflation.
 
 \FloatBarrier
 %==============================================================
 \section{Conclusion}\label{sec:conclusion}
 %==============================================================
 
-This paper re-analysed a public dataset commonly presented as a checkout A/B test, but which fundamentally reflects a comparison of two aggregate marketing campaigns. The pooled click-level comparison suggests that the Test campaign yields lower conversion among clickers than Control. Yet this conclusion is no longer supported when the substantial daily overdispersion inherent to marketing campaigns, sample-ratio ambiguity, A/A non-exchangeability, and post-treatment funnel conditioning are taken into account.
+The central conclusion of this paper is methodological. We re-analysed a public dataset commonly presented as a checkout A/B test, demonstrating that it fundamentally reflects a comparison of two aggregate marketing campaigns. While a pooled click-level comparison suggests the Test campaign yields lower conversion among clickers than Control, this finding collapses when accounting for the substantial daily overdispersion, sample-ratio ambiguity, A/A non-exchangeability, and post-treatment funnel conditioning.
 
-The central conclusion is methodological. Daily aggregate datasets can reveal compositional confounding and generate hypotheses, but they cannot replace a properly logged, unit-level experiment. The observed overdispersion makes standard independent-trials inference inappropriate for causal interpretation. The most defensible next step is not an immediate rollout decision, but rather a cleaner follow-up experiment with documented randomisation, user/session identifiers, pre-specified funnel metrics, and robust statistical models that account for cluster-level noise.
+Daily aggregate datasets can reveal compositional confounding and generate hypotheses, but they cannot replace a properly logged, unit-level experiment. The observed overdispersion makes standard independent-trials inference inappropriate for causal interpretation. By establishing an explicit claim boundary, this analysis provides a template for critically evaluating similar aggregate A/B testing datasets in the literature, reinforcing that robust causal inference requires documented randomisation, unit-level tracking, and statistical models that respect cluster-level noise.
 
 \FloatBarrier
 %==============================================================

@@ -10,7 +10,7 @@ from pathlib import Path
 PAPER_SUMMARY = """
 PAPER: "What Can Be Learned from a Daily-Aggregate Marketing Campaign Dataset?
 Validity Diagnostics, Overdispersion, and Limits of Causal Interpretation"
-Authors: Nguyen Luong Hai Dang, Duong Quoc Huu, Nguyen Thi Thanh Tien
+Authors: Nguyen Luong Hai Dang, Duong Quoc Huu, Nguyen Thi Thanh Tien, Nguyen Hoang Linh
 (Faculty of Artificial Intelligence, FPT University, Vietnam)
 
 KEY FINDINGS:
