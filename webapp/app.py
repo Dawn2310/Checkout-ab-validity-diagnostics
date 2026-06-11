@@ -203,7 +203,7 @@ def api_chat():
         resp = client.chat.completions.create(
             model=os.environ.get("OPENAI_MODEL", "gpt-4o-mini"),
             messages=messages,
-            max_tokens=900,
+            max_completion_tokens=900,
             temperature=0.3,
         )
         return jsonify({"reply": resp.choices[0].message.content})
