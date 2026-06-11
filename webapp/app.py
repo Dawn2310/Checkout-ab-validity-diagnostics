@@ -204,7 +204,6 @@ def api_chat():
             model=os.environ.get("OPENAI_MODEL", "gpt-4o-mini"),
             messages=messages,
             max_completion_tokens=900,
-            temperature=0.3,
         )
         return jsonify({"reply": resp.choices[0].message.content})
     except Exception as exc:  # surface the real cause to the demo user
