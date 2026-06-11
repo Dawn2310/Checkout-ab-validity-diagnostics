@@ -63,7 +63,8 @@ To arrive at these conclusions, the analysis employs several advanced statistica
 
 ## 🚀 How to Run
 
-1. **Environment Setup:** Ensure the required dependencies are installed. We recommend creating a virtual environment first.
+### 1. Data Pipeline
+1. **Environment Setup:** Ensure the required dependencies are installed.
    ```bash
    pip install pandas scipy statsmodels matplotlib
    ```
@@ -74,6 +75,28 @@ To arrive at these conclusions, the analysis employs several advanced statistica
    ```
 
 3. **View Outputs:** Check the `output/` directory for the newly generated diagnostic reports (`.txt`), figures (`.png`), and processed datasets.
+
+### 2. Interactive Webapp & RAG Chatbot
+This project includes a Flask webapp serving the data visualizations and a RAG (Retrieval-Augmented Generation) chatbot that can answer questions based on the pipeline's statistical reports.
+
+1. **Install Web Dependencies:**
+   ```bash
+   pip install flask openai python-dotenv pandas
+   ```
+
+2. **Configure API Key:**
+   Create a `.env` file in the `webapp/` folder (`webapp/.env`) and add your OpenAI API key and model preference:
+   ```env
+   OPENAI_API_KEY=sk-...
+   OPENAI_MODEL=gpt-4o-mini
+   ```
+   *(Note: The `webapp/.env` file is intentionally ignored by git to protect your API key).*
+
+3. **Start the Server:**
+   ```bash
+   python webapp/app.py
+   ```
+4. **Access the Webapp:** Open `http://127.0.0.1:5000` in your browser.
 
 ## 📖 The Manuscript & Practical Implications
 
