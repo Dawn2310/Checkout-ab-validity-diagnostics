@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Trang chủ — A/B Test Validity Diagnostics{% endblock %}
+{% block content %}
+
+<section class="hero">
+  <div class="eyebrow">Nghiên cứu Data Science · FPT University</div>
+  <h1>What Can Be Learned from a Daily-Aggregate Marketing Campaign Dataset?</h1>
+  <p>Validity Diagnostics, Overdispersion, and Limits of Causal Interpretation.
+     Tái phân tích một bộ dữ liệu A/B testing công khai dưới góc nhìn phương pháp luận:
+     dữ liệu tổng hợp theo ngày có thể — và không thể — chứng minh điều gì về quan hệ nhân quả?</p>
+  <div class="cta-row">
+    <a class="btn btn-primary" href="/diagnostics">Xem chẩn đoán validity →</a>
+    <a class="btn btn-ghost" href="/chatbot">💬 Hỏi chatbot về nghiên cứu</a>
+  </div>
+</section>
+
+<div class="kpi-grid">
+  <div class="kpi">
+    <div class="label">CR Control vs Test</div>
+    <div class="value" data-counter>{{ kpi.cr_control }} / {{ kpi.cr_test }}</div>
+    <div class="note">Chênh lệch tương đối {{ kpi.rel_diff }} (pooled)</div>
+  </div>
+  <div class="kpi">
+    <div class="label">Hệ số overdispersion</div>
+    <div class="value bad" data-counter>{{ kpi.dispersion }}×</div>
+    <div class="note">Phương sai ngày vượt binomial ~163 lần</div>
+  </div>
+  <div class="kpi">
+    <div class="label">GLM quasi-binomial</div>
+    <div class="value" data-counter>p = {{ kpi.glm_p }}</div>
+    <div class="note">Không còn ý nghĩa thống kê sau hiệu chỉnh</div>
+  </div>
+  <div class="kpi">
+    <div class="label">A/A false-positive rate</div>
+    <div class="value bad" data-counter>{{ kpi.aa_fpr }}</div>
+    <div class="note">So với mức danh nghĩa 5%</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>📋 Ba câu hỏi nghiên cứu</h2>
+  <p><strong>RQ1 — So sánh tổng hợp:</strong> Phép so sánh conversion gộp theo click cho thấy gì,
+  và kết luận thay đổi ra sao khi đơn vị phân tích chuyển từ <em>click</em> sang <em>ngày</em>?</p>
+  <p><strong>RQ2 — Độ tin cậy:</strong> Mô hình overdispersion, kiểm định sample-ratio-mismatch
+  và mô phỏng A/A nói gì về độ tin cậy của suy diễn "ngây thơ" trên dữ liệu tổng hợp này?</p>
+  <p><strong>RQ3 — Diễn giải:</strong> Những mẫu hình funnel và weekday nào xuất hiện,
+  và vì sao chúng chỉ nên được xem là <em>gợi mở giả thuyết</em> chứ không phải bằng chứng nhân quả?</p>
+</div>
+
+<div class="nav-card-grid">
+  <a class="nav-card" href="/dataset">
+    <div class="icon">📊</div>
+    <h3>Dữ liệu</h3>
+    <p>60 bản ghi ngày (T8/2019), hai chiến dịch Control vs Test, các đếm funnel và spend.</p>
+    <span class="go">Khám phá →</span>
+  </a>
+  <a class="nav-card" href="/diagnostics">
+    <div class="icon">🩺</div>
+    <h3>Chẩn đoán validity</h3>
+    <p>SRM χ² = 1646.44, mô phỏng A/A cho false-positive rate 87.8% — phát hiện trung tâm của bài báo.</p>
+    <span class="go">Khám phá →</span>
+  </a>
+  <a class="nav-card" href="/results">
+    <div class="icon">📈</div>
+    <h3>Kết quả thống kê</h3>
+    <p>Z-test pooled vs quasi-binomial GLM: cùng một dữ liệu, hai kết luận trái ngược.</p>
+    <span class="go">Khám phá →</span>
+  </a>
+  <a class="nav-card" href="/funnel">
+    <div class="icon">🔻</div>
+    <h3>Phân rã phễu</h3>
+    <p>CTR +67% nhưng add-to-cart −30%: câu chuyện compositional confounding.</p>
+    <span class="go">Khám phá →</span>
+  </a>
+  <a class="nav-card" href="/weekday">
+    <div class="icon">📅</div>
+    <h3>Phân tích weekday</h3>
+    <p>Hiệu ứng đảo dấu theo ngày trong tuần — tín hiệu gợi mở giả thuyết.</p>
+    <span class="go">Khám phá →</span>
+  </a>
+  <a class="nav-card" href="/paper">
+    <div class="icon">📄</div>
+    <h3>Bài báo</h3>
+    <p>Manuscript định dạng Springer Nature, abstract, tài liệu tham khảo Q1/Q2.</p>
+    <span class="go">Khám phá →</span>
+  </a>
+</div>
+
+{% endblock %}

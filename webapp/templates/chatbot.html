@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Chatbot — A/B Test Validity Diagnostics{% endblock %}
+{% block content %}
+
+<div class="page-head">
+  <div class="eyebrow">Research Assistant · OpenAI</div>
+  <h1>Hỏi đáp về nghiên cứu</h1>
+  <p class="sub">Chatbot được nạp toàn bộ kết quả phân tích (reports + số liệu).
+  Hỏi bằng tiếng Việt hoặc tiếng Anh — bot trả lời kèm đúng số liệu của đề tài.</p>
+</div>
+
+{% if not has_key %}
+<div class="callout danger" style="margin-bottom:20px">
+  <strong>Chưa cấu hình API key.</strong> Tạo file <code>webapp/.env</code> với nội dung
+  <code>OPENAI_API_KEY=sk-...</code> rồi khởi động lại server.
+</div>
+{% endif %}
+
+<div class="chat-shell">
+  <div class="chat-head">
+    <span class="dot"></span>
+    <h2>Research Assistant</h2>
+    <span class="model">gpt-4o-mini · RAG trên pipeline reports</span>
+  </div>
+  <div class="chat-body" id="chatBody">
+    <div class="msg bot">Xin chào! 👋 Tôi là trợ lý nghiên cứu của đề tài
+"What Can Be Learned from a Daily-Aggregate Marketing Campaign Dataset?".
+
+Thầy/cô và các bạn có thể hỏi tôi về: SRM, mô phỏng A/A, overdispersion,
+quasi-binomial GLM, phân rã phễu, weekday patterns, hoặc bất kỳ số liệu nào trong bài.</div>
+  </div>
+  <div class="chat-suggest" id="suggest">
+    <button>Vì sao Z-test và GLM cho kết luận trái ngược?</button>
+    <button>SRM trong nghiên cứu này có ý nghĩa gì?</button>
+    <button>Compositional confounding là gì?</button>
+    <button>Kết luận cuối cùng của bài báo?</button>
+  </div>
+  <div class="chat-input">
+    <input id="chatInput" type="text" placeholder="Nhập câu hỏi về nghiên cứu..." autocomplete="off">
+    <button id="chatSend">Gửi</button>
+  </div>
+</div>
+
+<div class="pager">
+  <a href="/paper"><span class="dir">← Trước</span>Bài báo</a>
+  <a href="/" class="next"><span class="dir">Về</span>Trang chủ</a>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='chat.js') }}"></script>
+{% endblock %}
