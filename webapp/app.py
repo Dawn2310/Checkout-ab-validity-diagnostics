@@ -12,7 +12,11 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 from pathlib import Path
+
+# Đảm bảo thư mục webapp nằm trong sys.path để import được context_builder khi chạy trên Render (Gunicorn)
+sys.path.insert(0, str(Path(__file__).parent))
 
 import pandas as pd
 from dotenv import load_dotenv
