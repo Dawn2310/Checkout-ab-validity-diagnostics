@@ -26,7 +26,7 @@ TABLES = OUTPUT / "tables"
 FIGURES = OUTPUT / "figures"
 PAPER = ROOT / "paper"
 
-load_dotenv(Path(__file__).parent / ".env")
+load_dotenv(Path(__file__).parent / ".env", override=True)
 
 app = Flask(__name__)
 
@@ -185,8 +185,8 @@ def api_chat():
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
         return jsonify({
-            "reply": "⚠️ Chưa cấu hình OPENAI_API_KEY. "
-                     "Tạo file webapp/.env với nội dung: OPENAI_API_KEY=sk-..."
+            "reply": "⚠️ OPENAI_API_KEY not configured. "
+                     "Create a webapp/.env file with: OPENAI_API_KEY=sk-..."
         })
 
     try:
