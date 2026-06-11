@@ -3,6 +3,7 @@
 **Validity Diagnostics, Overdispersion, and Funnel Dynamics**
 
 [![Code Repository](https://img.shields.io/badge/GitHub-Repository-blue.svg)](https://github.com/Dawn2310/Checkout-ab-validity-diagnostics)
+[![Live Demo](https://img.shields.io/badge/Live-Webapp_%26_Chatbot-success.svg)](https://checkout-ab-validity-diagnostics.onrender.com)
 
 This repository contains the replication code, data processing pipeline, and final diagnostic manuscript for a re-analysis of a public Kaggle dataset. Originally framed as a "checkout-page redesign A/B test", we demonstrate that the dataset structurally resembles a comparison of two aggregate marketing campaigns, and that a naive binomial interpretation of the results drastically underestimates the true noise level due to daily overdispersion.
 
