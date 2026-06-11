@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Weekday — A/B Test Validity Diagnostics{% endblock %}
+{% block content %}
+
+<div class="page-head">
+  <div class="eyebrow">Step 5 / 5 · Exploratory</div>
+  <h1>Weekday Patterns: Hypothesis-Generating Only</h1>
+  <p class="sub">Sign-reversing effects across days of the week — from −55.4% (Saturday)
+  to +63.0% (Sunday). But each weekday has only 4–5 paired observations,
+  so these are exploratory signals, <strong>not</strong> deployment rules.</p>
+</div>
+
+<div class="card">
+  <h2>Forest Plot: Absolute CR Difference by Weekday (Interactive)</h2>
+  <div id="wdPlot" class="plot" style="min-height:480px"></div>
+  <p style="font-size:.85rem;color:var(--muted);font-style:italic;text-align:center">
+    Square markers = significant after Holm correction; horizontal bars = 95% confidence intervals.
+    Hover for detailed segment statistics.
+  </p>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <h2>Why This Cannot Be a Deployment Rule</h2>
+    <ul>
+      <li><strong>Extremely thin samples:</strong> only 4–5 paired days per weekday within the 30-day window.</li>
+      <li><strong>Multiple testing:</strong> 7 simultaneous comparisons — Holm-corrected but still
+      exploratory and not pre-registered.</li>
+      <li><strong>Mixed regimes:</strong> evidence that the pooled average is blending
+      different "traffic regimes" over time — exactly the overdispersion documented on the Results page.</li>
+    </ul>
+    <div class="callout danger">
+      <strong>No conclusion such as:</strong> "enable Test on Sundays, disable on Saturdays".
+      Such a claim requires a new experiment: pre-register weekday as a moderator,
+      run for a longer period, preserve the randomisation unit, record traffic-source covariates.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>The Real Value of This Signal</h2>
+    <p>The sign-reversal pattern is <strong>additional evidence for the paper's central thesis</strong>:
+    the pooled average conceals complex temporal structure. It explains why daily variance is
+    ~163× larger than binomial, and reinforces the recommendation that rollout decisions require
+    a properly logged, unit-level experiment.</p>
+    <p>In the paper, this section is presented as <em>"Weekday patterns are
+    hypothesis-generating only"</em> and uses a forest plot to emphasise
+    uncertainty rather than point estimates.</p>
+  </div>
+</div>
+
+<div class="pager">
+  <a href="/funnel"><span class="dir">← Previous</span>Funnel Decomposition</a>
+  <a href="/paper" class="next"><span class="dir">Next →</span>Research Paper</a>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const W = {{ chart|safe }};
+const symbols = W.significant.map(s => s ? 'square' : 'circle');
+const colors = W.abs_uplift_pp.map(v => v >= 0
+  ? 'rgba(30, 142, 78, 0.9)'
+  : 'rgba(192, 57, 43, 0.9)');
+
+Plotly.newPlot('wdPlot', [{
+  y: W.weekdays, x: W.abs_uplift_pp, type: 'scatter', mode: 'markers',
+  error_x: { type: 'data', array: W.err, color: '#8595a5', thickness: 1.8, width: 0 },
+  marker: { size: 14, symbol: symbols, color: colors,
+            line: { width: 1.8, color: '#1c2733' } },
+  customdata: W.weekdays.map((d,i)=>[W.rel_uplift[i], W.n_control[i], W.n_test[i],
+                                     W.significant[i] ? 'Yes (Holm)' : 'No']),
+  hovertemplate: '<b>%{y}</b><br>Δ CR: %{x} pp<br>Rel. Δ: %{customdata[0]}%' +
+                 '<br>n Control: %{customdata[1]:,} · n Test: %{customdata[2]:,}' +
+                 '<br>Significant: %{customdata[3]}<extra></extra>'
+}], {
+  xaxis: {
+    title: { text: 'Absolute CR Difference (pp, Test − Control)', font: { size: 14 } },
+    gridcolor: '#eaeef3', gridwidth: 1,
+    zerolinecolor: '#1c2733', zerolinewidth: 2,
+  },
+  yaxis: { autorange: 'reversed', tickfont: { size: 13 } },
+  plot_bgcolor: '#fff', paper_bgcolor: '#fff',
+  font: { family: 'Inter, sans-serif', size: 13, color: '#1c2733' },
+  margin: { t: 24, r: 44, b: 64, l: 110 },
+  shapes: [{
+    type: 'line', x0: 0, x1: 0, y0: -0.5, y1: W.weekdays.length - 0.5,
+    line: { color: '#1c2733', width: 1.5, dash: 'dot' }
+  }]
+}, {responsive: true, displayModeBar: false});
+</script>
+{% endblock %}

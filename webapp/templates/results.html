@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Results — A/B Test Validity Diagnostics{% endblock %}
+{% block content %}
+
+<div class="page-head">
+  <div class="eyebrow">Step 3 / 5</div>
+  <h1>Same Data — Two Opposing Conclusions</h1>
+  <p class="sub">The pooled click-level Z-test declares Test significantly worse (p &lt; 10⁻³⁰).
+  The quasi-binomial GLM correcting for overdispersion says: insufficient evidence (p = 0.342).
+  The difference lies in the <strong>unit of analysis</strong>.</p>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <h2>Click-Level View (Naive)</h2>
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>Quantity</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>CR Control</td><td class="num">9.8502% (Wilson CI: 9.70–9.99%)</td></tr>
+          <tr><td>CR Test</td><td class="num">8.6407% (Wilson CI: 8.51–8.77%)</td></tr>
+          <tr><td>Absolute difference</td><td class="num">−1.21 percentage points</td></tr>
+          <tr><td>Relative difference</td><td class="num">−12.28%</td></tr>
+          <tr><td>Two-proportion Z</td><td class="num">−12.139 · p &lt; 10⁻³⁰</td></tr>
+          <tr><td>χ² (2×2 table)</td><td class="num">147.21 · p &lt; 10⁻³⁰</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout">
+      This conclusion is <strong>only valid if</strong> each click is an independent Bernoulli
+      trial — an assumption the dataset cannot guarantee.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Day-Level View (Robust)</h2>
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>Check</th><th>Result</th><th>Assessment</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Dispersion scale (quasi-binomial)</td>
+            <td class="num">162.95</td>
+            <td><span class="tag red">~163× binomial</span></td>
+          </tr>
+          <tr>
+            <td>Quasi-binomial GLM</td>
+            <td class="num">p = 0.342</td>
+            <td><span class="tag gray">Not significant</span></td>
+          </tr>
+          <tr>
+            <td>Welch t-test (daily CR)</td>
+            <td class="num">t = −1.518 · p = 0.135</td>
+            <td><span class="tag gray">Not significant</span></td>
+          </tr>
+          <tr>
+            <td>Bootstrap 95% CI (rel. uplift)</td>
+            <td class="num">[−32.19%, +12.71%]</td>
+            <td><span class="tag gray">Contains zero</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout warn">
+      After properly modelling daily variance, the CR difference is
+      <strong>entirely within the noise band</strong> of overdispersion.
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Overall Conversion Rate with Wilson 95% Confidence Intervals</h2>
+  <div id="crPlot" class="plot"></div>
+  <p style="font-size:.85rem;color:var(--muted);font-style:italic;text-align:center">
+    Wilson 95% CIs computed on pooled clicks — the two intervals are disjoint,
+    but the very assumption of click independence is challenged by the Diagnostics page.
+  </p>
+</div>
+
+<div class="card">
+  <h2>Why Do the Two Views Contradict?</h2>
+  <p>This is the <strong>unit-of-analysis paradox</strong>.
+  The massive click denominator (~338K) shrinks the standard error of the Z-test to near zero,
+  so any difference becomes "significant". But the true replicated units visible in the public
+  data are <strong>30 days per group</strong> — and between days, CR fluctuates wildly due to
+  ad delivery algorithms, weekday seasonality, spend variation, and unobserved traffic composition.</p>
+  <p>The quasi-binomial model directly estimates this variance inflation
+  (scale = Pearson χ² / residual df = <strong>162.95</strong>) and expands standard errors
+  accordingly. Result: p = 0.342 — the data cannot conclude that Test is genuinely worse.</p>
+</div>
+
+<div class="pager">
+  <a href="/diagnostics"><span class="dir">← Previous</span>Validity Diagnostics</a>
+  <a href="/funnel" class="next"><span class="dir">Next →</span>Funnel Decomposition</a>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const layout = {
+  yaxis: {
+    title: { text: 'Conversion Rate (%)', font: { size: 14 } },
+    range: [0, 11.5], gridcolor: '#eaeef3', gridwidth: 1,
+    zeroline: false,
+  },
+  xaxis: { tickfont: { size: 14, family: 'Inter, sans-serif' } },
+  plot_bgcolor: '#fff', paper_bgcolor: '#fff',
+  font: { family: 'Inter, sans-serif', size: 13, color: '#1c2733' },
+  margin: { t: 24, r: 32, b: 56, l: 64 },
+  bargap: 0.45,
+};
+
+Plotly.newPlot('crPlot', [{
+  x: ['Control', 'Test'],
+  y: [9.8502, 8.6407],
+  error_y: { type: 'data', symmetric: false,
+             array: [0.1482, 0.1303], arrayminus: [0.1463, 0.1286],
+             color: '#1c2733', thickness: 2, width: 8 },
+  type: 'bar',
+  marker: {
+    color: ['rgba(14, 42, 71, 0.88)', 'rgba(29, 122, 140, 0.88)'],
+    line: { width: 0 },
+    cornerradius: 6,
+  },
+  text: ['9.85%', '8.64%'],
+  textposition: 'outside',
+  textfont: { size: 15, family: 'Inter, sans-serif', color: '#1c2733' },
+  hovertemplate: '<b>%{x}</b><br>CR: %{y:.4f}%<extra></extra>'
+}], layout, {responsive: true, displayModeBar: false});
+</script>
+{% endblock %}

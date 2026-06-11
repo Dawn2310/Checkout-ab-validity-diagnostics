@@ -4,15 +4,15 @@
 
 <div class="page-head">
   <div class="eyebrow">Research Assistant · OpenAI</div>
-  <h1>Hỏi đáp về nghiên cứu</h1>
-  <p class="sub">Chatbot được nạp toàn bộ kết quả phân tích (reports + số liệu).
-  Hỏi bằng tiếng Việt hoặc tiếng Anh — bot trả lời kèm đúng số liệu của đề tài.</p>
+  <h1>Ask About This Research</h1>
+  <p class="sub">The chatbot is loaded with the full analysis results (reports + statistics).
+  Ask in Vietnamese or English — it will respond with exact figures from the study.</p>
 </div>
 
 {% if not has_key %}
 <div class="callout danger" style="margin-bottom:20px">
-  <strong>Chưa cấu hình API key.</strong> Tạo file <code>webapp/.env</code> với nội dung
-  <code>OPENAI_API_KEY=sk-...</code> rồi khởi động lại server.
+  <strong>API key not configured.</strong> Create a file <code>webapp/.env</code> with
+  <code>OPENAI_API_KEY=sk-...</code> and restart the server.
 </div>
 {% endif %}
 
@@ -20,30 +20,30 @@
   <div class="chat-head">
     <span class="dot"></span>
     <h2>Research Assistant</h2>
-    <span class="model">gpt-4o-mini · RAG trên pipeline reports</span>
+    <span class="model">gpt-4o-mini · RAG on pipeline reports</span>
   </div>
   <div class="chat-body" id="chatBody">
-    <div class="msg bot">Xin chào! 👋 Tôi là trợ lý nghiên cứu của đề tài
-"What Can Be Learned from a Daily-Aggregate Marketing Campaign Dataset?".
+    <div class="msg bot">Hello! 👋 I am the research assistant for the study
+"What Can Be Learned from a Daily-Aggregate Marketing Campaign Dataset?"
 
-Thầy/cô và các bạn có thể hỏi tôi về: SRM, mô phỏng A/A, overdispersion,
-quasi-binomial GLM, phân rã phễu, weekday patterns, hoặc bất kỳ số liệu nào trong bài.</div>
+You can ask me about: SRM, A/A simulation, overdispersion, quasi-binomial GLM,
+funnel decomposition, weekday patterns, or any statistic in the paper.</div>
   </div>
   <div class="chat-suggest" id="suggest">
-    <button>Vì sao Z-test và GLM cho kết luận trái ngược?</button>
-    <button>SRM trong nghiên cứu này có ý nghĩa gì?</button>
-    <button>Compositional confounding là gì?</button>
-    <button>Kết luận cuối cùng của bài báo?</button>
+    <button>Why do the Z-test and GLM give opposite conclusions?</button>
+    <button>What does SRM mean in this study?</button>
+    <button>What is compositional confounding?</button>
+    <button>What is the paper's final conclusion?</button>
   </div>
   <div class="chat-input">
-    <input id="chatInput" type="text" placeholder="Nhập câu hỏi về nghiên cứu..." autocomplete="off">
-    <button id="chatSend">Gửi</button>
+    <input id="chatInput" type="text" placeholder="Type a question about the research..." autocomplete="off">
+    <button id="chatSend">Send</button>
   </div>
 </div>
 
 <div class="pager">
-  <a href="/paper"><span class="dir">← Trước</span>Bài báo</a>
-  <a href="/" class="next"><span class="dir">Về</span>Trang chủ</a>
+  <a href="/paper"><span class="dir">← Previous</span>Research Paper</a>
+  <a href="/" class="next"><span class="dir">Back to</span>Home</a>
 </div>
 
 {% endblock %}

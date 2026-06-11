@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Diagnostics — A/B Test Validity Diagnostics{% endblock %}
+{% block content %}
+
+<div class="page-head">
+  <div class="eyebrow">Step 2 / 5 · Central Finding</div>
+  <h1>Validity Diagnostics: SRM &amp; A/A Simulation</h1>
+  <p class="sub">Before asking "which variant wins", we must ask "can this experiment be read
+  as a clean independent-trials test at all?" The answer: no.</p>
+</div>
+
+<div class="kpi-grid">
+  <div class="kpi">
+    <div class="label">Observed Click Split</div>
+    <div class="value">46.51% / 53.49%</div>
+    <div class="note">Control / Test — 23,602 click imbalance</div>
+  </div>
+  <div class="kpi">
+    <div class="label">SRM χ² (ref 50/50)</div>
+    <div class="value bad">{{ kpi.srm_chi2 }}</div>
+    <div class="note">p &lt; 10⁻³⁰ — extreme mismatch</div>
+  </div>
+  <div class="kpi">
+    <div class="label">A/A False-Positive Rate</div>
+    <div class="value bad">{{ kpi.aa_fpr }}</div>
+    <div class="note">Nominal level is only 5%</div>
+  </div>
+  <div class="kpi">
+    <div class="label">KS Test p-value (A/A)</div>
+    <div class="value bad">&lt; 10⁻¹⁵</div>
+    <div class="note">p-value distribution far from U[0,1]</div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <h2>1 · Sample Ratio Mismatch</h2>
+    <p>Under a 50/50 click-level reference allocation, the observed imbalance is virtually
+    impossible by chance (χ² = 1646.44, p → 0). However, since the <strong>assignment unit
+    is undocumented</strong>, this result has two plausible meanings:</p>
+    <ul>
+      <li><strong>If randomised before impression:</strong> the click imbalance may be caused
+      by the Test campaign's higher CTR (+67%) — SRM is then partly a <em>treatment effect</em>.</li>
+      <li><strong>If randomised at click/session level:</strong> this constitutes strong
+      evidence of allocation failure or logging errors.</li>
+    </ul>
+    <div class="callout warn">
+      <strong>Lesson:</strong> SRM must be evaluated at the correct randomisation unit
+      (impressions in this dataset), not at downstream funnel stages.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>2 · A/A Simulation</h2>
+    <p>Randomly split the 30 Control days into two halves, pool clicks/purchases within
+    each half, run a Z-test — repeat 2,000 times. If days were exchangeable replicates,
+    p-values should follow U[0,1] and only ~5% of tests should reject.</p>
+    <p>In practice: <strong>87.8% of tests reject</strong> — over 17× the nominal rate.
+    The root cause is not a flawed formula, but the <em>non-exchangeability</em> of
+    daily aggregates: weekday effects, spend variation, campaign scheduling, and
+    unobserved traffic composition make each day a different "experiment".</p>
+    <div class="callout danger">
+      <strong>Consequence:</strong> Naive pooled inference (pooled Z-test) on daily
+      aggregate data is unreliable for causal conclusions.
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>A/A Simulation p-value Distribution</h2>
+  <div class="fig">
+    <img src="/figures/aa_simulation_pvalues.png" alt="A/A simulation p-values">
+    <div class="cap">Under H₀ the distribution should be uniform — in practice it is
+    massively concentrated near 0, showing that days are not exchangeable replicates.</div>
+  </div>
+</div>
+
+{% if outliers %}
+<div class="card">
+  <h2>3 · Outlier Days (1.5×IQR Rule on Daily CR)</h2>
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>Group</th><th>Date</th><th>CR</th><th>Clicks</th><th>Purchases</th></tr></thead>
+      <tbody>
+      {% for o in outliers %}
+        <tr>
+          <td>{{ o.group }}</td>
+          <td>{{ o.date }}</td>
+          <td class="num">{{ "%.2f%%"|format(o.cr * 100) }}</td>
+          <td class="num">{{ "{:,}".format(o.clicks) }}</td>
+          <td class="num">{{ "{:,}".format(o.purchase) }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<div class="pager">
+  <a href="/dataset"><span class="dir">← Previous</span>Dataset</a>
+  <a href="/results" class="next"><span class="dir">Next →</span>Statistical Results</a>
+</div>
+
+{% endblock %}

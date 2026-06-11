@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Dataset — A/B Test Validity Diagnostics{% endblock %}
+{% block content %}
+
+<div class="page-head">
+  <div class="eyebrow">Step 1 / 5</div>
+  <h1>Dataset &amp; Experimental Design Ambiguity</h1>
+  <p class="sub">60 daily records (1–30 Aug 2019): one Control row and one Test row per day.
+  Commonly framed as a "checkout A/B test", but structurally resembles a comparison of two
+  aggregate marketing campaigns.</p>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <h2>Aggregate Summary by Variant</h2>
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>Metric</th><th>Control</th><th>Test</th></tr></thead>
+        <tbody>
+          {% for r in agg_rows %}
+          <tr><td>{{ r.q }}</td><td class="num">{{ r.c }}</td><td class="num">{{ r.t }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="callout">
+      <strong>Note:</strong> Spend is advertising cost, <em>not</em> observed revenue.
+      Revenue is unobserved — assumed-AOV metrics were removed from the paper as they
+      merely rescale conversion rate.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Missing Metadata → Claim Boundaries</h2>
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>What's Missing</th><th>Consequence</th></tr></thead>
+        <tbody>
+          <tr><td>Randomisation unit</td><td>Click-pooled tests are descriptive only</td></tr>
+          <tr><td>Intended allocation ratio</td><td>SRM is an ambiguity warning, not a verdict</td></tr>
+          <tr><td>User / session IDs</td><td>No individual-level causal heterogeneity claims</td></tr>
+          <tr><td>Traffic source / device mix</td><td>Funnel &amp; weekday patterns are hypotheses only</td></tr>
+          <tr><td>Pre-treatment covariates</td><td>CUPED is a sensitivity check only</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Data Processing</h3>
+    <ul>
+      <li>Control row on <strong>5 Aug 2019</strong> has missing counts → imputed via forward-fill.</li>
+      <li>Parse date <code>dd.mm.yyyy</code>, normalise column names, compute funnel rates.</li>
+      <li>Fully reproducible pipeline: <code>python main.py</code> (seed = 42).</li>
+    </ul>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Daily Conversion Rate Time Series</h2>
+  <div class="fig">
+    <img src="/figures/eda_timeseries_cr.png" alt="Daily CR time series">
+    <div class="cap">Daily CR for both variants — large day-to-day fluctuations are the source of overdispersion.</div>
+  </div>
+</div>
+
+<div class="pager">
+  <a href="/"><span class="dir">← Previous</span>Home</a>
+  <a href="/diagnostics" class="next"><span class="dir">Next →</span>Validity Diagnostics</a>
+</div>
+
+{% endblock %}

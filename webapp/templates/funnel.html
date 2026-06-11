@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Funnel — A/B Test Validity Diagnostics{% endblock %}
+{% block content %}
+
+<div class="page-head">
+  <div class="eyebrow">Step 4 / 5</div>
+  <h1>Funnel Decomposition: A Compositional Puzzle, Not a Direct Mechanism</h1>
+  <p class="sub">Test wins big at the top of the funnel (CTR +67%) but loses heavily in the
+  middle (add-to-cart −30%), then wins again at the bottom (purchase-given-cart +48%).
+  The cautious interpretation: Test changes the <strong>user composition</strong> at each
+  conditional stage.</p>
+</div>
+
+<div class="card">
+  <h2>Relative Difference by Funnel Step (Interactive)</h2>
+  <div id="funnelPlot" class="plot"></div>
+  <p style="font-size:.85rem;color:var(--muted);font-style:italic;text-align:center">
+    Hover for per-group rates and Holm-corrected p-values. All 5 steps are statistically
+    significant after Holm correction — but "significant" ≠ "causal".
+  </p>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <h2>Two Stories That Both Fit the Data</h2>
+    <h3>📐 Design-Mechanism Story</h3>
+    <p>The Test landing page attracts attention but introduces friction before cart formation
+    — "pretty but clunky".</p>
+    <h3>🎯 Selection Story (more cautious)</h3>
+    <p>Test (via broader ad targeting) attracts additional <strong>low-intent clickers</strong>.
+    Mid-funnel rates decline as a compositional consequence of expanding the top of the funnel
+    — even if the checkout mechanics are identical.</p>
+    <div class="callout warn">
+      <strong>Why prefer Story 2?</strong> Clicks are a <em>post-treatment</em> subset:
+      when treatment changes the probability of clicking, the clicker population of Test ≠
+      that of Control. All conditional rates downstream of clicks are subject to post-treatment
+      selection bias.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Detail Table</h2>
+    <div class="table-wrap">
+      <table class="data" id="funnelTable">
+        <thead><tr><th>Step</th><th>Control</th><th>Test</th><th>Rel. Δ</th><th>p (Holm)</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <h3>Implications for Follow-Up Research</h3>
+    <ul>
+      <li>Randomise at the correct funnel entry point.</li>
+      <li>Retain user/session IDs to separate mechanism effects from compositional effects.</li>
+      <li>Record traffic source to control for compositional confounding.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="pager">
+  <a href="/results"><span class="dir">← Previous</span>Statistical Results</a>
+  <a href="/weekday" class="next"><span class="dir">Next →</span>Weekday Analysis</a>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const F = {{ chart|safe }};
+const colors = F.rel_diff.map(v => v >= 0
+  ? 'rgba(30, 142, 78, 0.85)'
+  : 'rgba(192, 57, 43, 0.85)');
+
+Plotly.newPlot('funnelPlot', [{
+  x: F.steps, y: F.rel_diff, type: 'bar',
+  marker: { color: colors, line: { width: 0 }, cornerradius: 5 },
+  text: F.rel_diff.map(v => (v>0?'+':'') + v + '%'),
+  textposition: 'outside',
+  textfont: { size: 13, family: 'Inter, sans-serif', color: '#1c2733' },
+  customdata: F.steps.map((s,i)=>[F.rate_control[i], F.rate_test[i], F.p_holm[i]]),
+  hovertemplate: '<b>%{x}</b><br>Control: %{customdata[0]}%<br>Test: %{customdata[1]}%' +
+                 '<br>Rel. Δ: %{y}%<br>p (Holm): %{customdata[2]}<extra></extra>'
+}], {
+  yaxis: {
+    title: { text: 'Relative Difference (%)', font: { size: 14 } },
+    gridcolor: '#eaeef3', gridwidth: 1,
+    zerolinecolor: '#1c2733', zerolinewidth: 2,
+  },
+  xaxis: { tickfont: { size: 12, family: 'Inter, sans-serif' } },
+  plot_bgcolor: '#fff', paper_bgcolor: '#fff',
+  font: { family: 'Inter, sans-serif', size: 12, color: '#1c2733' },
+  margin: { t: 32, r: 32, b: 96, l: 64 },
+  bargap: 0.35,
+}, {responsive: true, displayModeBar: false});
+
+const tbody = document.querySelector('#funnelTable tbody');
+F.steps.forEach((s, i) => {
+  const sign = F.rel_diff[i] >= 0 ? '+' : '';
+  const cls = F.rel_diff[i] >= 0 ? 'green' : 'red';
+  tbody.insertAdjacentHTML('beforeend',
+    `<tr><td>${s}</td><td class="num">${F.rate_control[i]}%</td>` +
+    `<td class="num">${F.rate_test[i]}%</td>` +
+    `<td class="num"><span class="tag ${cls}">${sign}${F.rel_diff[i]}%</span></td>` +
+    `<td class="num">${F.p_holm[i]}</td></tr>`);
+});
+</script>
+{% endblock %}

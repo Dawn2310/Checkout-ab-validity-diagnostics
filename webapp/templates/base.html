@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="A/B Test Validity Diagnostics — Tái phân tích dataset marketing aggregate với overdispersion, SRM, và giới hạn diễn giải nhân quả.">
+<meta name="description" content="A/B Test Validity Diagnostics — Re-analysis of an aggregate marketing campaign dataset with overdispersion modelling, SRM diagnostics, and limits of causal interpretation.">
 <meta name="author" content="Nguyen Luong Hai Dang, Duong Quoc Huu, Nguyen Thi Thanh Tien">
 <title>{% block title %}A/B Test Validity Diagnostics{% endblock %}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,13 +26,13 @@
     </button>
 
     <div class="nav-links" id="navLinks">
-      <a href="/" class="{{ 'active' if page=='home' }}">Trang chủ</a>
-      <a href="/dataset" class="{{ 'active' if page=='dataset' }}">Dữ liệu</a>
-      <a href="/diagnostics" class="{{ 'active' if page=='diagnostics' }}">Chẩn đoán</a>
-      <a href="/results" class="{{ 'active' if page=='results' }}">Kết quả</a>
-      <a href="/funnel" class="{{ 'active' if page=='funnel' }}">Phễu</a>
+      <a href="/" class="{{ 'active' if page=='home' }}">Home</a>
+      <a href="/dataset" class="{{ 'active' if page=='dataset' }}">Dataset</a>
+      <a href="/diagnostics" class="{{ 'active' if page=='diagnostics' }}">Diagnostics</a>
+      <a href="/results" class="{{ 'active' if page=='results' }}">Results</a>
+      <a href="/funnel" class="{{ 'active' if page=='funnel' }}">Funnel</a>
       <a href="/weekday" class="{{ 'active' if page=='weekday' }}">Weekday</a>
-      <a href="/paper" class="{{ 'active' if page=='paper' }}">Bài báo</a>
+      <a href="/paper" class="{{ 'active' if page=='paper' }}">Paper</a>
       <a href="/chatbot" class="chat-link {{ 'active' if page=='chatbot' }}">💬 Chatbot</a>
     </div>
   </div>
@@ -56,15 +56,12 @@
 </footer>
 
 <script>
-// Hamburger menu toggle
 const hamburger = document.getElementById('hamburger');
 const navLinks = document.getElementById('navLinks');
 hamburger.addEventListener('click', () => {
   hamburger.classList.toggle('open');
   navLinks.classList.toggle('show');
 });
-
-// Scroll-reveal animation
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
 }, { threshold: 0.1 });
