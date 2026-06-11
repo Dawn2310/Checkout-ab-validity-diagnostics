@@ -51,7 +51,7 @@
 
 \begin{document}
 
-\title[Aggregate Campaign Diagnostics]{What Can Be Learned from a Daily-Aggregate Marketing Campaign Dataset? Validity Diagnostics, Overdispersion, and Limits of Causal Interpretation}
+\title[Aggregate Campaign Diagnostics]{Deconstructing Aggregate A/B Tests: Validity Diagnostics, Overdispersion, and Funnel Dynamics}
 
 \author*[1]{\fnm{Nguyen Luong Hai} \sur{Dang}}\email{nguyenluonghaidang2006pq@gmail.com}
 \author[1]{\fnm{Duong Quoc} \sur{Huu}}

@@ -1,6 +1,6 @@
-# What Can Be Learned from Aggregate Marketing Campaigns?
+# Deconstructing Aggregate A/B Tests
 
-**Validity Diagnostics, Overdispersion, and Limits of Causal Interpretation**
+**Validity Diagnostics, Overdispersion, and Funnel Dynamics**
 
 [![Code Repository](https://img.shields.io/badge/GitHub-Repository-blue.svg)](https://github.com/Dawn2310/Checkout-ab-validity-diagnostics)
 
