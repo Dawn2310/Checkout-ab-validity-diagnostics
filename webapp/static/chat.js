@@ -9,7 +9,11 @@
   function addMsg(role, text, typing = false) {
     const div = document.createElement("div");
     div.className = "msg " + (role === "user" ? "user" : "bot") + (typing ? " typing" : "");
-    div.textContent = text;
+    if (role === "bot" && typeof marked !== 'undefined' && !typing) {
+      div.innerHTML = marked.parse(text);
+    } else {
+      div.textContent = text;
+    }
     body.appendChild(div);
     body.scrollTop = body.scrollHeight;
     return div;
